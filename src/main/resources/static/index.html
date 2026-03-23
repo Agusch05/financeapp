@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Finance App</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="app">
+
+    <h1>Finance Dashboard</h1>
+
+    <div class="card">
+        <h2>Add Expense</h2>
+
+        <input id="amount" placeholder="Amount" type="number">
+        <input id="category" placeholder="Category ID">
+        <input id="user" placeholder="User ID">
+        <input id="date" type="date">
+
+        <button onclick="addExpense()">Add Expense</button>
+    </div>
+
+    <div class="card">
+        <h2>Expenses</h2>
+        <ul id="list"></ul>
+    </div>
+
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FinanceApp | Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body class="dashboard-body">
+    <div class="dashboard-container">
+        <!-- Navigation -->
+        <nav class="dashboard-nav">
+            <div class="nav-logo">
+                <h2>FINANCE<span style="font-weight:300">APP</span></h2>
+            </div>
+            <div class="nav-links">
+                <a href="#" class="active" data-tab="expenses">Expenses</a>
+                <a href="#" data-tab="incomes">Incomes</a>
+                <a href="#" data-tab="debts">Debts</a>
+            </div>
+            <div class="nav-user">
+                <span id="userNameDisplay"></span>
+                <button class="logout-btn" onclick="logout()">Logout</button>
+            </div>
+        </nav>
+
+        <!-- Dashboard Stats -->
+        <div class="dashboard-stats">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h3>Total Balance</h3>
+                    <div class="stat-value" id="totalBalance">$0.00</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Total Income</h3>
+                    <div class="stat-value positive" id="totalIncome">$0.00</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Total Expenses</h3>
+                    <div class="stat-value negative" id="totalExpenses">$0.00</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Total Debt</h3>
+                    <div class="stat-value negative" id="totalDebt">$0.00</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="dashboard-grid">
+            <!-- Expenses Section -->
+            <div id="expensesTab" class="tab-content active">
+                <div class="card">
+                    <h2>➕ Add Expense</h2>
+                    <div class="form-group">
+                        <label>Amount ($)</label>
+                        <input type="number" id="expenseAmount" placeholder="0.00" step="0.01">
+                    </div>
+                    <div class="form-group">
+                        <label>Category</label>
+                        <div style="display: flex; gap: 10px; align-items: center;">
+                            <select id="expenseCategory" style="flex: 1;"></select>
+                            <button type="button" class="btn-secondary" onclick="showNewCategoryModal()" style="width: auto; padding: 10px 16px;">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M12 5v14M5 12h14"/>
+                                </svg>
+                                New
+                            </button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Date</label>
+                        <input type="date" id="expenseDate">
+                    </div>
+                    <div class="form-group">
+                        <label>Description (optional)</label>
+                        <input type="text" id="expenseDescription" placeholder="What was this for?">
+                    </div>
+                    <button class="btn-primary" onclick="addExpense()">Add Expense</button>
+                </div>
+
+                <div class="card">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h2>📋 Recent Expenses</h2>
+                        <button class="btn-secondary-small" onclick="loadExpenses()">Refresh</button>
+                    </div>
+                    <div id="expenseListContainer">
+                        <ul class="expense-list" id="expenseList"></ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Incomes Section -->
+            <div id="incomesTab" class="tab-content">
+                <div class="card">
+                    <h2>💰 Add Income</h2>
+                    <div class="form-group">
+                        <label>Amount ($)</label>
+                        <input type="number" id="incomeAmount" placeholder="0.00" step="0.01">
+                    </div>
+                    <div class="form-group">
+                        <label>Source</label>
+                        <input type="text" id="incomeSource" placeholder="Salary, Freelance, etc.">
+                    </div>
+                    <div class="form-group">
+                        <label>Date</label>
+                        <input type="date" id="incomeDate">
+                    </div>
+                    <button class="btn-primary" onclick="addIncome()">Add Income</button>
+                </div>
+
+                <div class="card">
+                    <h2>📊 Income History</h2>
+                    <ul class="expense-list" id="incomeList"></ul>
+                </div>
+            </div>
+
+            <!-- Debts Section -->
+            <div id="debtsTab" class="tab-content">
+                <div class="card">
+                    <h2>💳 Add Debt</h2>
+                    <div class="form-group">
+                        <label>Total Amount ($)</label>
+                        <input type="number" id="debtAmount" placeholder="0.00" step="0.01">
+                    </div>
+                    <div class="form-group">
+                        <label>Monthly Payment ($)</label>
+                        <input type="number" id="monthlyPayment" placeholder="0.00" step="0.01">
+                    </div>
+                    <div class="form-group">
+                        <label>Remaining Months</label>
+                        <input type="number" id="remainingMonths" placeholder="12">
+                    </div>
+                    <div class="form-group">
+                        <label>Interest Rate (%)</label>
+                        <input type="number" id="interestRate" placeholder="0.00" step="0.01">
+                    </div>
+                    <div class="form-group">
+                        <label>Debt Name</label>
+                        <input type="text" id="debtName" placeholder="Car loan, Credit card, etc.">
+                    </div>
+                    <button class="btn-primary" onclick="addDebt()">Add Debt</button>
+                </div>
+
+                <div class="card">
+                    <h2>📉 Active Debts</h2>
+                    <ul class="expense-list" id="debtList"></ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para crear nueva categoría -->
+    <div id="categoryModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Create New Category</h3>
+                <span class="close" onclick="closeModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Category Name</label>
+                    <input type="text" id="newCategoryName" placeholder="e.g., Groceries, Rent, Entertainment" autocomplete="off">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closeModal()">Cancel</button>
+                <button class="btn-primary" onclick="createNewCategory()">Create Category</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // API Endpoints
+        const API_BASE = 'http://localhost:8080';
+        
+        // Current user
+        let currentUser = null;
+        
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', () => {
+            // Check if user is logged in
+            const user = localStorage.getItem('user');
+            if (!user) {
+                window.location.href = 'login.html';
+                return;
+            }
+            
+            currentUser = JSON.parse(user);
+            document.getElementById('userNameDisplay').textContent = currentUser.name || currentUser.nickname;
+            
+            // Setup tab navigation
+            setupTabs();
+            
+            // Load all data
+            loadCategories();
+            loadExpenses();
+            loadIncomes();
+            loadDebts();
+            
+            // Set default dates
+            document.getElementById('expenseDate').valueAsDate = new Date();
+            document.getElementById('incomeDate').valueAsDate = new Date();
+        });
+        
+        // Tab navigation
+        function setupTabs() {
+            const tabs = document.querySelectorAll('.nav-links a');
+            tabs.forEach(tab => {
+                tab.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const tabId = tab.dataset.tab;
+                    
+                    // Update active tab
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    
+                    // Show corresponding content
+                    document.querySelectorAll('.tab-content').forEach(content => {
+                        content.classList.remove('active');
+                    });
+                    document.getElementById(`${tabId}Tab`).classList.add('active');
+                });
+            });
+        }
+        
+        // Categories
+        async function loadCategories() {
+            try {
+                const response = await fetch(`${API_BASE}/category`);
+                const categories = await response.json();
+                
+                // Update category select
+                const select = document.getElementById('expenseCategory');
+                if (categories.length === 0) {
+                    select.innerHTML = '<option value="">No categories yet. Click "New" to create one!</option>';
+                } else {
+                    select.innerHTML = '<option value="">Select a category</option>';
+                    categories.forEach(cat => {
+                        select.innerHTML += `<option value="${cat.id}">${cat.name}</option>`;
+                    });
+                }
+                
+                return categories;
+            } catch (error) {
+                console.error('Error loading categories:', error);
+                return [];
+            }
+        }
+        
+        // Modal functions for categories
+        function showNewCategoryModal() {
+            document.getElementById('categoryModal').style.display = 'block';
+            document.getElementById('newCategoryName').value = '';
+            document.getElementById('newCategoryName').focus();
+        }
+        
+        function closeModal() {
+            document.getElementById('categoryModal').style.display = 'none';
+        }
+        
+        async function createNewCategory() {
+            const name = document.getElementById('newCategoryName').value.trim();
+            if (!name) {
+                alert('Please enter a category name');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE}/category`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name: name })
+                });
+                
+                if (response.ok) {
+                    const newCategory = await response.json();
+                    closeModal();
+                    await loadCategories();
+                    
+                    // Auto-select the new category in the dropdown
+                    const select = document.getElementById('expenseCategory');
+                    select.value = newCategory.id;
+                    
+                    // Show success message
+                    showToast(`Category "${name}" created successfully!`, 'success');
+                } else {
+                    alert('Error creating category. Please try again.');
+                }
+            } catch (error) {
+                console.error('Error creating category:', error);
+                alert('Error creating category. Make sure the server is running.');
+            }
+        }
+        
+        // Expenses
+        async function loadExpenses() {
+            try {
+                const response = await fetch(`${API_BASE}/expenses`);
+                const expenses = await response.json();
+                
+                const expenseList = document.getElementById('expenseList');
+                if (expenses.length === 0) {
+                    expenseList.innerHTML = '<li style="text-align: center; color: #9ca3af;">No expenses yet. Add your first expense above!</li>';
+                } else {
+                    expenseList.innerHTML = expenses.map(exp => `
+                        <li>
+                            <div>
+                                <strong>$${exp.amount.toFixed(2)}</strong>
+                                <span style="color:#9ca3af; margin-left: 12px;">${exp.category?.name || 'Uncategorized'}</span>
+                                ${exp.description ? `<span style="color:#6b7280; margin-left: 12px; font-size: 12px;">${exp.description}</span>` : ''}
+                            </div>
+                            <div style="color:#9ca3af; font-size: 12px;">${exp.date || 'No date'}</div>
+                        </li>
+                    `).join('');
+                }
+                
+                // Update total expenses
+                const total = expenses.reduce((sum, exp) => sum + exp.amount, 0);
+                document.getElementById('totalExpenses').textContent = `$${total.toFixed(2)}`;
+                updateBalance();
+            } catch (error) {
+                console.error('Error loading expenses:', error);
+            }
+        }
+        
+        async function addExpense() {
+            const amount = parseFloat(document.getElementById('expenseAmount').value);
+            const categoryId = document.getElementById('expenseCategory').value;
+            const date = document.getElementById('expenseDate').value;
+            const description = document.getElementById('expenseDescription').value;
+            
+            if (!amount || amount <= 0) {
+                alert('Please enter a valid amount');
+                return;
+            }
+            
+            if (!categoryId) {
+                alert('Please select a category or create a new one');
+                return;
+            }
+            
+            // Obtener el usuario actual del localStorage
+            const userStr = localStorage.getItem('user');
+            let userId = 1; // ID por defecto
+            
+            if (userStr) {
+                try {
+                    const user = JSON.parse(userStr);
+                    userId = user.id;
+                } catch(e) {
+                    console.error('Error parsing user', e);
+                }
+            }
+            
+            const expense = {
+                amount: amount,
+                date: date,
+                description: description || '',
+                category: { id: parseInt(categoryId) },
+                user: { id: userId }  // Usar el ID real del usuario
+            };
+            
+            console.log('Sending expense:', expense); // Debug
+            
+            try {
+                const response = await fetch(`${API_BASE}/expenses`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(expense)
+                });
+                
+                if (response.ok) {
+                    document.getElementById('expenseAmount').value = '';
+                    document.getElementById('expenseDescription').value = '';
+                    loadExpenses();
+                    showToast('Expense added successfully!', 'success');
+                } else {
+                    const errorText = await response.text();
+                    console.error('Server error:', errorText);
+                    alert('Error adding expense: ' + errorText);
+                }
+            } catch (error) {
+                console.error('Error adding expense:', error);
+                alert('Error adding expense. Make sure the server is running.');
+            }
+        }
+        
+        // Incomes
+        async function loadIncomes() {
+            try {
+                const response = await fetch(`${API_BASE}/incomes`);
+                const incomes = await response.json();
+                
+                const incomeList = document.getElementById('incomeList');
+                if (incomes.length === 0) {
+                    incomeList.innerHTML = '<li style="text-align: center; color: #9ca3af;">No income recorded yet</li>';
+                } else {
+                    incomeList.innerHTML = incomes.map(inc => `
+                        <li>
+                            <div>
+                                <strong>$${inc.amount.toFixed(2)}</strong>
+                                <span style="color:#9ca3af; margin-left: 12px;">${inc.source || 'No source'}</span>
+                            </div>
+                            <div style="color:#9ca3af; font-size: 12px;">${inc.date || 'No date'}</div>
+                        </li>
+                    `).join('');
+                }
+                
+                // Update total income
+                const total = incomes.reduce((sum, inc) => sum + inc.amount, 0);
+                document.getElementById('totalIncome').textContent = `$${total.toFixed(2)}`;
+                updateBalance();
+            } catch (error) {
+                console.error('Error loading incomes:', error);
+            }
+        }
+        
+        async function addIncome() {
+            const amount = parseFloat(document.getElementById('incomeAmount').value);
+            const source = document.getElementById('incomeSource').value;
+            const date = document.getElementById('incomeDate').value;
+            
+            if (!amount || amount <= 0) {
+                alert('Please enter a valid amount');
+                return;
+            }
+            
+            const income = {
+                amount: amount,
+                date: date,
+                source: source || 'General'
+            };
+            
+            try {
+                const response = await fetch(`${API_BASE}/incomes`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(income)
+                });
+                
+                if (response.ok) {
+                    document.getElementById('incomeAmount').value = '';
+                    document.getElementById('incomeSource').value = '';
+                    loadIncomes();
+                    showToast('Income added successfully!', 'success');
+                } else {
+                    alert('Error adding income');
+                }
+            } catch (error) {
+                console.error('Error adding income:', error);
+                alert('Error adding income. Make sure the server is running.');
+            }
+        }
+        
+        // Debts
+        async function loadDebts() {
+            try {
+                const response = await fetch(`${API_BASE}/debts`);
+                const debts = await response.json();
+                
+                const debtList = document.getElementById('debtList');
+                if (debts.length === 0) {
+                    debtList.innerHTML = '<li style="text-align: center; color: #9ca3af;">No debts recorded</li>';
+                } else {
+                    debtList.innerHTML = debts.map(debt => `
+                        <li>
+                            <div>
+                                <strong>${debt.name || 'Debt'}</strong>
+                                <span style="color:#10b981; margin-left: 12px;">$${debt.totalAmount.toFixed(2)} total</span>
+                            </div>
+                            <div style="color:#9ca3af; font-size: 12px;">
+                                $${debt.monthlyPayment}/month · ${debt.remainingMonths} months left
+                                ${debt.interestRate > 0 ? ` · ${debt.interestRate}% APR` : ''}
+                            </div>
+                        </li>
+                    `).join('');
+                }
+                
+                // Update total debt
+                const total = debts.reduce((sum, debt) => sum + debt.totalAmount, 0);
+                document.getElementById('totalDebt').textContent = `$${total.toFixed(2)}`;
+                updateBalance();
+            } catch (error) {
+                console.error('Error loading debts:', error);
+            }
+        }
+        
+        async function addDebt() {
+            const totalAmount = parseFloat(document.getElementById('debtAmount').value);
+            const monthlyPayment = parseFloat(document.getElementById('monthlyPayment').value);
+            const remainingMonths = parseInt(document.getElementById('remainingMonths').value);
+            const interestRate = parseFloat(document.getElementById('interestRate').value);
+            const name = document.getElementById('debtName').value;
+            
+            if (!totalAmount || totalAmount <= 0) {
+                alert('Please enter a valid total amount');
+                return;
+            }
+            
+            if (!monthlyPayment || monthlyPayment <= 0) {
+                alert('Please enter a valid monthly payment');
+                return;
+            }
+            
+            const debt = {
+                name: name || 'Debt',
+                totalAmount: totalAmount,
+                monthlyPayment: monthlyPayment,
+                remainingMonths: remainingMonths || 12,
+                interestRate: interestRate || 0,
+                startDate: new Date().toISOString().split('T')[0],
+                endDate: new Date(new Date().setMonth(new Date().getMonth() + (remainingMonths || 12))).toISOString().split('T')[0]
+            };
+            
+            try {
+                const response = await fetch(`${API_BASE}/debts`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(debt)
+                });
+                
+                if (response.ok) {
+                    document.getElementById('debtAmount').value = '';
+                    document.getElementById('monthlyPayment').value = '';
+                    document.getElementById('remainingMonths').value = '';
+                    document.getElementById('interestRate').value = '';
+                    document.getElementById('debtName').value = '';
+                    loadDebts();
+                    showToast('Debt added successfully!', 'success');
+                } else {
+                    alert('Error adding debt');
+                }
+            } catch (error) {
+                console.error('Error adding debt:', error);
+                alert('Error adding debt. Make sure the server is running.');
+            }
+        }
+        
+        // Balance calculation
+        async function updateBalance() {
+            const totalIncome = parseFloat(document.getElementById('totalIncome').textContent.replace('$', '')) || 0;
+            const totalExpenses = parseFloat(document.getElementById('totalExpenses').textContent.replace('$', '')) || 0;
+            const balance = totalIncome - totalExpenses;
+            const balanceElement = document.getElementById('totalBalance');
+            balanceElement.textContent = `$${balance.toFixed(2)}`;
+            balanceElement.style.color = balance >= 0 ? '#10b981' : '#ef4444';
+        }
+        
+        // Toast notification
+        function showToast(message, type) {
+            // Create toast element if it doesn't exist
+            let toast = document.getElementById('toast');
+            if (!toast) {
+                toast = document.createElement('div');
+                toast.id = 'toast';
+                document.body.appendChild(toast);
+            }
+            
+            toast.textContent = message;
+            toast.className = `toast show toast-${type}`;
+            
+            setTimeout(() => {
+                toast.className = toast.className.replace('show', '');
+            }, 3000);
+        }
+        
+        // Logout
+        function logout() {
+            localStorage.removeItem('user');
+            window.location.href = 'login.html';
+        }
+        
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('categoryModal');
+            if (event.target === modal) {
+                closeModal();
+            }
+        }
+        
+        // Auto-refresh every 30 seconds
+        setInterval(() => {
+            loadExpenses();
+            loadIncomes();
+            loadDebts();
+        }, 30000);
+    </script>
+</body>
+</html>

@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FinanceApp | Register</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body class="login-body">
+    <div class="particles"></div>
+    <div class="glass-container">
+        <div class="logo-container">
+            <div class="logo-icon">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none">
+                    <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="white" stroke-width="1.5"/>
+                    <path d="M2 17L12 22L22 17" stroke="white" stroke-width="1.5"/>
+                    <path d="M2 12L12 17L22 12" stroke="white" stroke-width="1.5"/>
+                </svg>
+            </div>
+            <h1>FINANCE<span>APP</span></h1>
+        </div>
+        
+        <h2>Create Account</h2>
+        <p class="subtitle">Get started with your financial journey</p>
+        
+        <form id="registerForm" class="auth-form">
+            <div class="input-group">
+                <label>Full Name</label>
+                <input type="text" id="name" placeholder="John Doe" required>
+                <div class="input-border"></div>
+            </div>
+            
+            <div class="input-group">
+                <label>Nickname</label>
+                <input type="text" id="nickname" placeholder="johndoe" required>
+                <div class="input-border"></div>
+            </div>
+            
+            <div class="input-group">
+                <label>Password</label>
+                <input type="password" id="password" placeholder="••••••••" required>
+                <div class="input-border"></div>
+            </div>
+            
+            <div class="input-group">
+                <label>Confirm Password</label>
+                <input type="password" id="confirmPassword" placeholder="••••••••" required>
+                <div class="input-border"></div>
+            </div>
+            
+            <button type="submit" class="btn-primary">
+                <span>Create Account</span>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                    <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="currentColor" stroke-width="2"/>
+                </svg>
+            </button>
+        </form>
+        
+        <div class="auth-footer">
+            <p>Already have an account? <a href="login.html">Sign in</a></p>
+        </div>
+    </div>
+    
+<script>
+    const API_BASE = 'http://localhost:8080';
+    
+    document.getElementById('registerForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const name = document.getElementById('name').value;
+        const nickname = document.getElementById('nickname').value;
+        const password = document.getElementById('password').value;
+        const confirmPassword = document.getElementById('confirmPassword').value;
+        
+        if (password !== confirmPassword) {
+            alert('Passwords do not match');
+            return;
+        }
+        
+        const user = {
+            name: name,
+            password: password
+        };
+        
+        console.log('Registering user:', user);
+        
+        try {
+            const response = await fetch(`${API_BASE}/users`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(user)
+            });
+            
+            console.log('Response status:', response.status);
+            
+            if (response.ok) {
+                const newUser = await response.json();
+                console.log('User created with ID:', newUser.id);
+                // Guardar el usuario con su ID real
+                localStorage.setItem('user', JSON.stringify(newUser));
+                alert('Account created successfully!');
+                window.location.href = 'dashboard.html';
+            } else {
+                const errorText = await response.text();
+                console.error('Server error:', errorText);
+                alert('Error creating account: ' + errorText);
+            }
+        } catch (error) {
+            console.error('Registration error:', error);
+            alert('Error connecting to server. Make sure the backend is running.');
+        }
+    });
+</script>
+</body>
+</html>

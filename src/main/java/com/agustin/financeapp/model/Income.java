@@ -1,0 +1,37 @@
+package com.agustin.financeapp.model;
+
+import java.time.LocalDate;
+import jakarta.persistence.*;
+
+@Entity
+@Table(name = "incomes")
+public class Income {
+    
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    
+    private double amount;
+    private LocalDate date;
+    private String source;
+    
+    public Income() {}
+    
+    public Income(double amount, LocalDate date, String source) {
+        this.amount = amount;
+        this.date = date;
+        this.source = source;
+    }
+    
+    // Getters
+    public Long getId() { return id; }
+    public double getAmount() { return amount; }
+    public LocalDate getDate() { return date; }
+    public String getSource() { return source; }
+    
+    // Setters
+    public void setId(Long id) { this.id = id; }
+    public void setAmount(double amount) { this.amount = amount; }
+    public void setDate(LocalDate date) { this.date = date; }
+    public void setSource(String source) { this.source = source; }
+}
