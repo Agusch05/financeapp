@@ -57,15 +57,45 @@
     </div>
     
     <script>
-        document.getElementById('loginForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const nickname = document.getElementById('nickname').value;
-            const password = document.getElementById('password').value;
+    const API_BASE = 'http://localhost:8080';
+    
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const nickname = document.getElementById('nickname').value.trim();
+        const password = document.getElementById('password').value;
+        
+        if (!nickname || !password) {
+            alert('Please enter both nickname and password');
+            return;
+        }
+        
+        try {
+            // Obtener todos los usuarios del servidor
+            const response = await fetch(`${API_BASE}/users`);
+            const users = await response.json();
             
-            // Simulación de login - Aquí conectarás con tu backend
-            localStorage.setItem('user', JSON.stringify({ nickname, password }));
-            window.location.href = 'dashboard.html';
-        });
-    </script>
+            // Buscar usuario por nombre y contraseña
+            const user = users.find(u => u.name === nickname && u.password === password);
+            
+            if (user) {
+                // Login exitoso
+                localStorage.setItem('user', JSON.stringify(user));
+                window.location.href = 'dashboard.html';
+            } else {
+                // Verificar si el usuario existe pero contraseña incorrecta
+                const userExists = users.some(u => u.name === nickname);
+                if (userExists) {
+                    alert('Incorrect password. Please try again.');
+                } else {
+                    alert('User not found. Please register first.');
+                }
+            }
+        } catch (error) {
+            console.error('Login error:', error);
+            alert('Error connecting to server. Make sure the backend is running.');
+        }
+    });
+</script>
 </body>
 </html>

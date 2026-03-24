@@ -6,6 +6,7 @@
     <title>FinanceApp | Dashboard</title>
     <link rel="stylesheet" href="styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body class="dashboard-body">
     <div class="dashboard-container">
@@ -79,9 +80,22 @@
                     <button class="btn-primary" onclick="addExpense()">Add Expense</button>
                 </div>
 
+                <!-- Chart Section -->
                 <div class="card">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h2>📊 Spending Distribution</h2>
+                    <div style="position: relative; height: 300px;">
+                        <canvas id="expenseChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 12px;">
                         <h2>📋 Recent Expenses</h2>
+                        <div style="display: flex; gap: 10px; flex: 1; max-width: 400px;">
+                            <input type="text" id="searchInput" placeholder="🔍 Search by description or category..." style="flex: 1; padding: 8px 12px; border-radius: 20px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white;">
+                            <button class="btn-secondary-small" onclick="searchExpenses()">Search</button>
+                            <button class="btn-secondary-small" onclick="clearSearch()">Clear</button>
+                        </div>
                         <button class="btn-secondary-small" onclick="loadExpenses()">Refresh</button>
                     </div>
                     <div id="expenseListContainer">
@@ -116,39 +130,102 @@
             </div>
 
             <!-- Debts Section -->
-            <div id="debtsTab" class="tab-content">
-                <div class="card">
-                    <h2>💳 Add Debt</h2>
-                    <div class="form-group">
-                        <label>Total Amount ($)</label>
-                        <input type="number" id="debtAmount" placeholder="0.00" step="0.01">
-                    </div>
-                    <div class="form-group">
-                        <label>Monthly Payment ($)</label>
-                        <input type="number" id="monthlyPayment" placeholder="0.00" step="0.01">
-                    </div>
-                    <div class="form-group">
-                        <label>Remaining Months</label>
-                        <input type="number" id="remainingMonths" placeholder="12">
-                    </div>
-                    <div class="form-group">
-                        <label>Interest Rate (%)</label>
-                        <input type="number" id="interestRate" placeholder="0.00" step="0.01">
-                    </div>
-                    <div class="form-group">
-                        <label>Debt Name</label>
-                        <input type="text" id="debtName" placeholder="Car loan, Credit card, etc.">
-                    </div>
-                    <button class="btn-primary" onclick="addDebt()">Add Debt</button>
-                </div>
+			<div id="debtsTab" class="tab-content">
+			    <!-- Recordatorios -->
+			    <div id="reminderAlert" style="display: none;" class="reminder-alert">
+			        <div class="reminder-content">
+			            <span class="reminder-icon">⚠️</span>
+			            <span id="reminderMessage"></span>
+			            <button onclick="closeReminder()" class="reminder-close">×</button>
+			        </div>
+			    </div>
+			
+			    <div class="card">
+			        <h2>➕ Add New Debt</h2>
+			        <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+			            <div class="form-group">
+			                <label>Debt Name</label>
+			                <input type="text" id="debtName" placeholder="Car loan, Credit card, etc.">
+			            </div>
+			            <div class="form-group">
+			                <label>Total Amount ($)</label>
+			                <input type="number" id="debtAmount" placeholder="0.00" step="0.01" oninput="calculateMonthlyPayment()">
+			            </div>
+			            <div class="form-group">
+			                <label>Total Months</label>
+			                <input type="number" id="totalMonths" placeholder="12" oninput="calculateMonthlyPayment()">
+			            </div>
+			            <div class="form-group">
+			                <label>Interest Rate (%)</label>
+			                <input type="number" id="interestRate" placeholder="0.00" step="0.01" oninput="calculateMonthlyPayment()">
+			            </div>
+			            <div class="form-group">
+			                <label>Start Date</label>
+			                <input type="date" id="debtStartDate">
+			            </div>
+			        </div>
+			        
+			        <!-- Calculated Monthly Payment Display -->
+			        <div style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(16, 185, 129, 0.05)); border-radius: 12px; padding: 15px; margin: 15px 0;">
+			            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+			                <div>
+			                    <span style="color: #9ca3af; font-size: 12px;">CALCULATED MONTHLY PAYMENT</span>
+			                    <div style="font-size: 24px; font-weight: bold; color: #10b981;" id="calculatedMonthlyPayment">$0.00</div>
+			                </div>
+			                <div>
+			                    <span style="color: #9ca3af; font-size: 12px;">TOTAL TO PAY</span>
+			                    <div style="font-size: 18px; font-weight: bold; color: #fff;" id="totalToPay">$0.00</div>
+			                </div>
+			                <div>
+			                    <span style="color: #9ca3af; font-size: 12px;">TOTAL INTEREST</span>
+			                    <div style="font-size: 18px; font-weight: bold; color: #f59e0b;" id="totalInterest">$0.00</div>
+			                </div>
+			            </div>
+			        </div>
+			        
+			        <button class="btn-primary" onclick="addDebt()">Add Debt</button>
+			    </div>
+			
+			    <div class="card">
+			        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+			            <h2>💰 Active Debts</h2>
+			            <button class="btn-secondary-small" onclick="loadDebts()">Refresh</button>
+			        </div>
+			        <ul class="debt-list" id="debtList"></ul>
+			    </div>
+			
+			    <div class="card">
+			        <h2>✅ Paid Debts History</h2>
+			        <ul class="debt-list" id="paidDebtList"></ul>
+			    </div>
+			
+			    <!-- Modal para ver historial de pagos -->
+			    <div id="paymentHistoryModal" class="modal" style="display: none;">
+			        <div class="modal-content" style="max-width: 500px;">
+			            <div class="modal-header">
+			                <h3>Payment History</h3>
+			                <span class="close" onclick="closePaymentModal()">&times;</span>
+			            </div>
+			            <div class="modal-body">
+			                <div id="paymentHistoryList"></div>
+			            </div>
+			        </div>
+			    </div>
+			</div>
 
-                <div class="card">
-                    <h2>📉 Active Debts</h2>
-                    <ul class="expense-list" id="debtList"></ul>
-                </div>
+    <!-- Modal para ver historial de pagos -->
+    <div id="paymentHistoryModal" class="modal" style="display: none;">
+        <div class="modal-content" style="max-width: 500px;">
+            <div class="modal-header">
+                <h3>Payment History</h3>
+                <span class="close" onclick="closePaymentModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div id="paymentHistoryList"></div>
             </div>
         </div>
     </div>
+</div>
 
     <!-- Modal para crear nueva categoría -->
     <div id="categoryModal" class="modal">
@@ -170,12 +247,47 @@
         </div>
     </div>
 
+    <!-- Modal para editar gasto -->
+    <div id="editExpenseModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Edit Expense</h3>
+                <span class="close" onclick="closeEditModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="editExpenseId">
+                <div class="form-group">
+                    <label>Amount ($)</label>
+                    <input type="number" id="editExpenseAmount" step="0.01">
+                </div>
+                <div class="form-group">
+                    <label>Category</label>
+                    <select id="editExpenseCategory"></select>
+                </div>
+                <div class="form-group">
+                    <label>Date</label>
+                    <input type="date" id="editExpenseDate">
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <input type="text" id="editExpenseDescription">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closeEditModal()">Cancel</button>
+                <button class="btn-primary" onclick="saveEditExpense()">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         // API Endpoints
         const API_BASE = 'http://localhost:8080';
         
         // Current user
         let currentUser = null;
+        let allExpenses = []; // Store all expenses for filtering
+        let expenseChart = null;
         
         // Initialize dashboard
         document.addEventListener('DOMContentLoaded', () => {
@@ -201,6 +313,13 @@
             // Set default dates
             document.getElementById('expenseDate').valueAsDate = new Date();
             document.getElementById('incomeDate').valueAsDate = new Date();
+            
+            // Add search on enter key
+            document.getElementById('searchInput').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    searchExpenses();
+                }
+            });
         });
         
         // Tab navigation
@@ -238,6 +357,15 @@
                     select.innerHTML = '<option value="">Select a category</option>';
                     categories.forEach(cat => {
                         select.innerHTML += `<option value="${cat.id}">${cat.name}</option>`;
+                    });
+                }
+                
+                // Update edit category select
+                const editSelect = document.getElementById('editExpenseCategory');
+                if (editSelect) {
+                    editSelect.innerHTML = '';
+                    categories.forEach(cat => {
+                        editSelect.innerHTML += `<option value="${cat.id}">${cat.name}</option>`;
                     });
                 }
                 
@@ -282,7 +410,6 @@
                     const select = document.getElementById('expenseCategory');
                     select.value = newCategory.id;
                     
-                    // Show success message
                     showToast(`Category "${name}" created successfully!`, 'success');
                 } else {
                     alert('Error creating category. Please try again.');
@@ -293,35 +420,255 @@
             }
         }
         
+        // Load and display chart with percentages
+        async function loadChart(expensesData = null) {
+            const expenses = expensesData || allExpenses;
+            
+            if (expenses.length === 0) {
+                // Clear chart if no data
+                const ctx = document.getElementById('expenseChart').getContext('2d');
+                if (expenseChart) {
+                    expenseChart.destroy();
+                }
+                expenseChart = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['No Data'],
+                        datasets: [{
+                            data: [1],
+                            backgroundColor: ['#2d2d2d'],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: { color: '#fff' }
+                            }
+                        }
+                    }
+                });
+                return;
+            }
+            
+            // Calculate total spending
+            const totalSpent = expenses.reduce((sum, exp) => sum + exp.amount, 0);
+            
+            // Group by category and calculate percentages
+            const categoryMap = {};
+            expenses.forEach(exp => {
+                const catName = exp.category?.name || 'Uncategorized';
+                if (categoryMap[catName]) {
+                    categoryMap[catName] += exp.amount;
+                } else {
+                    categoryMap[catName] = exp.amount;
+                }
+            });
+            
+            // Sort categories by amount (descending)
+            const sortedCategories = Object.entries(categoryMap).sort((a, b) => b[1] - a[1]);
+            
+            const labels = sortedCategories.map(item => item[0]);
+            const amounts = sortedCategories.map(item => item[1]);
+            const percentages = amounts.map(amount => ((amount / totalSpent) * 100).toFixed(1));
+            
+            // Create labels with percentages
+            const labelsWithPercent = labels.map((label, index) => `${label} (${percentages[index]}%)`);
+            
+            const ctx = document.getElementById('expenseChart').getContext('2d');
+            
+            if (expenseChart) {
+                expenseChart.destroy();
+            }
+            
+            // Color palette
+            const colors = [
+                '#10b981', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6', 
+                '#ec489a', '#06b6d4', '#84cc16', '#f97316', '#a855f7',
+                '#14b8a6', '#d946ef', '#0ea5e9', '#eab308', '#6b7280'
+            ];
+            
+            expenseChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: labelsWithPercent,
+                    datasets: [{
+                        data: amounts,
+                        backgroundColor: colors.slice(0, labels.length),
+                        borderWidth: 0,
+                        hoverOffset: 10
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: { 
+                                color: '#fff',
+                                font: { size: 11 }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const label = context.label || '';
+                                    const value = context.raw;
+                                    const percentage = ((value / totalSpent) * 100).toFixed(1);
+                                    return `${label}: $${value.toFixed(2)} (${percentage}%)`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Search expenses by description or category
+        function searchExpenses() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase().trim();
+            
+            if (!searchTerm) {
+                displayExpenses(allExpenses);
+                loadChart(allExpenses);
+                return;
+            }
+            
+            const filteredExpenses = allExpenses.filter(exp => {
+                const description = (exp.description || '').toLowerCase();
+                const categoryName = (exp.category?.name || '').toLowerCase();
+                return description.includes(searchTerm) || categoryName.includes(searchTerm);
+            });
+            
+            displayExpenses(filteredExpenses);
+            loadChart(filteredExpenses);
+            
+            showToast(`Found ${filteredExpenses.length} expense(s) matching "${searchTerm}"`, 'info');
+        }
+        
+        function clearSearch() {
+            document.getElementById('searchInput').value = '';
+            displayExpenses(allExpenses);
+            loadChart(allExpenses);
+        }
+        
+        function displayExpenses(expenses) {
+            const expenseList = document.getElementById('expenseList');
+            if (expenses.length === 0) {
+                expenseList.innerHTML = '<li style="text-align: center; color: #9ca3af;">No expenses found</li>';
+            } else {
+                expenseList.innerHTML = expenses.map(exp => `
+                    <li style="display: flex; justify-content: space-between; align-items: center;">
+                        <div style="flex: 1;">
+                            <strong>$${exp.amount.toFixed(2)}</strong>
+                            <span style="color:#9ca3af; margin-left: 12px;">${exp.category?.name || 'Uncategorized'}</span>
+                            ${exp.description ? `<span style="color:#6b7280; margin-left: 12px; font-size: 12px;">${exp.description}</span>` : ''}
+                            <div style="color:#9ca3af; font-size: 12px; margin-top: 4px;">${exp.date || 'No date'}</div>
+                        </div>
+                        <div style="display: flex; gap: 8px;">
+                            <button onclick="editExpense(${exp.id})" class="btn-icon" style="background: none; border: none; cursor: pointer; color: #10b981; font-size: 18px;">
+                                ✏️
+                            </button>
+                            <button onclick="deleteExpense(${exp.id})" class="btn-icon" style="background: none; border: none; cursor: pointer; color: #ef4444; font-size: 18px;">
+                                🗑️
+                            </button>
+                        </div>
+                    </li>
+                `).join('');
+            }
+        }
+        
         // Expenses
         async function loadExpenses() {
             try {
                 const response = await fetch(`${API_BASE}/expenses`);
-                const expenses = await response.json();
+                allExpenses = await response.json();
                 
-                const expenseList = document.getElementById('expenseList');
-                if (expenses.length === 0) {
-                    expenseList.innerHTML = '<li style="text-align: center; color: #9ca3af;">No expenses yet. Add your first expense above!</li>';
-                } else {
-                    expenseList.innerHTML = expenses.map(exp => `
-                        <li>
-                            <div>
-                                <strong>$${exp.amount.toFixed(2)}</strong>
-                                <span style="color:#9ca3af; margin-left: 12px;">${exp.category?.name || 'Uncategorized'}</span>
-                                ${exp.description ? `<span style="color:#6b7280; margin-left: 12px; font-size: 12px;">${exp.description}</span>` : ''}
-                            </div>
-                            <div style="color:#9ca3af; font-size: 12px;">${exp.date || 'No date'}</div>
-                        </li>
-                    `).join('');
-                }
+                displayExpenses(allExpenses);
+                loadChart(allExpenses);
                 
-                // Update total expenses
-                const total = expenses.reduce((sum, exp) => sum + exp.amount, 0);
+                const total = allExpenses.reduce((sum, exp) => sum + exp.amount, 0);
                 document.getElementById('totalExpenses').textContent = `$${total.toFixed(2)}`;
                 updateBalance();
             } catch (error) {
                 console.error('Error loading expenses:', error);
             }
+        }
+        
+        // Function to delete expense
+        async function deleteExpense(id) {
+            if (confirm('Are you sure you want to delete this expense?')) {
+                try {
+                    const response = await fetch(`${API_BASE}/expenses/${id}`, {
+                        method: 'DELETE'
+                    });
+                    
+                    if (response.ok) {
+                        showToast('Expense deleted successfully!', 'success');
+                        loadExpenses();
+                    } else {
+                        alert('Error deleting expense');
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    alert('Error deleting expense');
+                }
+            }
+        }
+        
+        // Function to edit expense
+        function editExpense(id) {
+            fetch(`${API_BASE}/expenses/${id}`)
+                .then(res => res.json())
+                .then(expense => {
+                    document.getElementById('editExpenseId').value = expense.id;
+                    document.getElementById('editExpenseAmount').value = expense.amount;
+                    document.getElementById('editExpenseCategory').value = expense.category?.id || '';
+                    document.getElementById('editExpenseDate').value = expense.date;
+                    document.getElementById('editExpenseDescription').value = expense.description || '';
+                    document.getElementById('editExpenseModal').style.display = 'block';
+                })
+                .catch(error => console.error('Error:', error));
+        }
+        
+        // Function to save edited expense
+        async function saveEditExpense() {
+            const id = document.getElementById('editExpenseId').value;
+            const expense = {
+                id: parseInt(id),
+                amount: parseFloat(document.getElementById('editExpenseAmount').value),
+                date: document.getElementById('editExpenseDate').value,
+                description: document.getElementById('editExpenseDescription').value,
+                category: { id: parseInt(document.getElementById('editExpenseCategory').value) },
+                user: { id: JSON.parse(localStorage.getItem('user')).id }
+            };
+            
+            try {
+                const response = await fetch(`${API_BASE}/expenses/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(expense)
+                });
+                
+                if (response.ok) {
+                    showToast('Expense updated successfully!', 'success');
+                    closeEditModal();
+                    loadExpenses();
+                } else {
+                    alert('Error updating expense');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error updating expense');
+            }
+        }
+        
+        function closeEditModal() {
+            document.getElementById('editExpenseModal').style.display = 'none';
         }
         
         async function addExpense() {
@@ -340,9 +687,8 @@
                 return;
             }
             
-            // Obtener el usuario actual del localStorage
             const userStr = localStorage.getItem('user');
-            let userId = 1; // ID por defecto
+            let userId = 1;
             
             if (userStr) {
                 try {
@@ -358,10 +704,8 @@
                 date: date,
                 description: description || '',
                 category: { id: parseInt(categoryId) },
-                user: { id: userId }  // Usar el ID real del usuario
+                user: { id: userId }
             };
-            
-            console.log('Sending expense:', expense); // Debug
             
             try {
                 const response = await fetch(`${API_BASE}/expenses`, {
@@ -407,7 +751,6 @@
                     `).join('');
                 }
                 
-                // Update total income
                 const total = incomes.reduce((sum, inc) => sum + inc.amount, 0);
                 document.getElementById('totalIncome').textContent = `$${total.toFixed(2)}`;
                 updateBalance();
@@ -453,89 +796,320 @@
             }
         }
         
-        // Debts
-        async function loadDebts() {
-            try {
-                const response = await fetch(`${API_BASE}/debts`);
-                const debts = await response.json();
-                
-                const debtList = document.getElementById('debtList');
-                if (debts.length === 0) {
-                    debtList.innerHTML = '<li style="text-align: center; color: #9ca3af;">No debts recorded</li>';
-                } else {
-                    debtList.innerHTML = debts.map(debt => `
-                        <li>
-                            <div>
-                                <strong>${debt.name || 'Debt'}</strong>
-                                <span style="color:#10b981; margin-left: 12px;">$${debt.totalAmount.toFixed(2)} total</span>
-                            </div>
-                            <div style="color:#9ca3af; font-size: 12px;">
-                                $${debt.monthlyPayment}/month · ${debt.remainingMonths} months left
-                                ${debt.interestRate > 0 ? ` · ${debt.interestRate}% APR` : ''}
-                            </div>
-                        </li>
-                    `).join('');
-                }
-                
-                // Update total debt
-                const total = debts.reduce((sum, debt) => sum + debt.totalAmount, 0);
-                document.getElementById('totalDebt').textContent = `$${total.toFixed(2)}`;
-                updateBalance();
-            } catch (error) {
-                console.error('Error loading debts:', error);
-            }
-        }
-        
-        async function addDebt() {
-            const totalAmount = parseFloat(document.getElementById('debtAmount').value);
-            const monthlyPayment = parseFloat(document.getElementById('monthlyPayment').value);
-            const remainingMonths = parseInt(document.getElementById('remainingMonths').value);
-            const interestRate = parseFloat(document.getElementById('interestRate').value);
-            const name = document.getElementById('debtName').value;
-            
-            if (!totalAmount || totalAmount <= 0) {
-                alert('Please enter a valid total amount');
-                return;
-            }
-            
-            if (!monthlyPayment || monthlyPayment <= 0) {
-                alert('Please enter a valid monthly payment');
-                return;
-            }
-            
-            const debt = {
-                name: name || 'Debt',
-                totalAmount: totalAmount,
-                monthlyPayment: monthlyPayment,
-                remainingMonths: remainingMonths || 12,
-                interestRate: interestRate || 0,
-                startDate: new Date().toISOString().split('T')[0],
-                endDate: new Date(new Date().setMonth(new Date().getMonth() + (remainingMonths || 12))).toISOString().split('T')[0]
-            };
-            
-            try {
-                const response = await fetch(`${API_BASE}/debts`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(debt)
-                });
-                
-                if (response.ok) {
-                    document.getElementById('debtAmount').value = '';
-                    document.getElementById('monthlyPayment').value = '';
-                    document.getElementById('remainingMonths').value = '';
-                    document.getElementById('interestRate').value = '';
-                    document.getElementById('debtName').value = '';
-                    loadDebts();
-                    showToast('Debt added successfully!', 'success');
-                } else {
-                    alert('Error adding debt');
-                }
-            } catch (error) {
-                console.error('Error adding debt:', error);
-                alert('Error adding debt. Make sure the server is running.');
-            }
-        }
+        // Debts - Enhanced version
+		// Función para calcular el pago mensual (fórmula de amortización)
+		function calculateMonthlyPayment() {
+		    const totalAmount = parseFloat(document.getElementById('debtAmount').value) || 0;
+		    const totalMonths = parseInt(document.getElementById('totalMonths').value) || 0;
+		    const interestRate = parseFloat(document.getElementById('interestRate').value) || 0;
+		    
+		    if (totalAmount <= 0 || totalMonths <= 0) {
+		        document.getElementById('calculatedMonthlyPayment').textContent = '$0.00';
+		        document.getElementById('totalToPay').textContent = '$0.00';
+		        document.getElementById('totalInterest').textContent = '$0.00';
+		        return 0;
+		    }
+		    
+		    let monthlyPayment;
+		    let totalToPay;
+		    let totalInterestAmount;
+		    
+		    if (interestRate === 0) {
+		        // Sin interés: pago mensual = total / meses
+		        monthlyPayment = totalAmount / totalMonths;
+		        totalToPay = totalAmount;
+		        totalInterestAmount = 0;
+		    } else {
+		        // Con interés: usar fórmula de amortización
+		        const monthlyRate = (interestRate / 100) / 12;
+		        
+		        if (monthlyRate === 0) {
+		            monthlyPayment = totalAmount / totalMonths;
+		        } else {
+		            // Fórmula: P = (r * PV) / (1 - (1 + r)^-n)
+		            monthlyPayment = (monthlyRate * totalAmount) / (1 - Math.pow(1 + monthlyRate, -totalMonths));
+		        }
+		        
+		        totalToPay = monthlyPayment * totalMonths;
+		        totalInterestAmount = totalToPay - totalAmount;
+		    }
+		    
+		    // Actualizar displays
+		    document.getElementById('calculatedMonthlyPayment').textContent = `$${monthlyPayment.toFixed(2)}`;
+		    document.getElementById('totalToPay').textContent = `$${totalToPay.toFixed(2)}`;
+		    document.getElementById('totalInterest').textContent = `$${totalInterestAmount.toFixed(2)}`;
+		    
+		    return monthlyPayment;
+		}
+		
+		// Función mejorada para agregar deuda (sin pedir monthly payment)
+		async function addDebt() {
+		    const name = document.getElementById('debtName').value.trim();
+		    const totalAmount = parseFloat(document.getElementById('debtAmount').value);
+		    const totalMonths = parseInt(document.getElementById('totalMonths').value);
+		    let interestRate = parseFloat(document.getElementById('interestRate').value); // Convertir a número
+		    const startDate = document.getElementById('debtStartDate').value;
+		    
+		    // Validaciones
+		    if (!name) {
+		        alert('Please enter a debt name');
+		        return;
+		    }
+		    
+		    if (isNaN(totalAmount) || totalAmount <= 0) {
+		        alert('Please enter a valid total amount');
+		        return;
+		    }
+		    
+		    if (isNaN(totalMonths) || totalMonths <= 0) {
+		        alert('Please enter valid total months');
+		        return;
+		    }
+		    
+		    // Si interestRate es NaN (campo vacío), establecer a 0
+		    if (isNaN(interestRate)) {
+		        interestRate = 0;
+		    }
+		    
+		    // Calcular el pago mensual
+		    let monthlyPayment;
+		    
+		    if (interestRate === 0) {
+		        // Sin interés: pago mensual = total / meses
+		        monthlyPayment = totalAmount / totalMonths;
+		    } else {
+		        // Con interés: fórmula de amortización
+		        const monthlyRate = (interestRate / 100) / 12;
+		        monthlyPayment = (monthlyRate * totalAmount) / (1 - Math.pow(1 + monthlyRate, -totalMonths));
+		    }
+		    
+		    const debt = {
+		        name: name,
+		        totalAmount: totalAmount,
+		        monthlyPayment: monthlyPayment,
+		        remainingMonths: totalMonths,
+		        totalMonths: totalMonths,
+		        interestRate: interestRate,
+		        startDate: startDate || new Date().toISOString().split('T')[0],
+		        endDate: new Date(new Date().setMonth(new Date().getMonth() + totalMonths)).toISOString().split('T')[0],
+		        active: true,
+		        remainingAmount: totalAmount
+		    };
+		    
+		    console.log('Creating debt:', debt);
+		    
+		    try {
+		        const response = await fetch(`${API_BASE}/debts`, {
+		            method: 'POST',
+		            headers: { 'Content-Type': 'application/json' },
+		            body: JSON.stringify(debt)
+		        });
+		        
+		        if (response.ok) {
+		            // Limpiar formulario
+		            document.getElementById('debtName').value = '';
+		            document.getElementById('debtAmount').value = '';
+		            document.getElementById('totalMonths').value = '';
+		            document.getElementById('interestRate').value = '';
+		            document.getElementById('debtStartDate').value = '';
+		            
+		            // Resetear displays
+		            document.getElementById('calculatedMonthlyPayment').textContent = '$0.00';
+		            document.getElementById('totalToPay').textContent = '$0.00';
+		            document.getElementById('totalInterest').textContent = '$0.00';
+		            
+		            loadDebts();
+		            showToast('Debt added successfully!', 'success');
+		        } else {
+		            const errorText = await response.text();
+		            console.error('Server error:', errorText);
+		            alert('Error adding debt: ' + errorText);
+		        }
+		    } catch (error) {
+		        console.error('Error adding debt:', error);
+		        alert('Error adding debt. Make sure the server is running.');
+		    }
+		}
+		
+		// Función actualizada para mostrar deudas con información completa
+		async function loadDebts() {
+		    try {
+		        const response = await fetch(`${API_BASE}/debts`);
+		        allDebts = await response.json();
+		        
+		        // Separar activas y pagadas
+		        const activeDebts = allDebts.filter(d => d.active);
+		        const paidDebts = allDebts.filter(d => !d.active);
+		        
+		        // Mostrar deudas activas
+		        const debtList = document.getElementById('debtList');
+		        if (activeDebts.length === 0) {
+		            debtList.innerHTML = '<li style="text-align: center; color: #9ca3af;">No active debts. Add your first debt above!</li>';
+		        } else {
+		            debtList.innerHTML = activeDebts.map(debt => {
+		                const progressPercent = ((debt.totalMonths - debt.remainingMonths) / debt.totalMonths * 100).toFixed(1);
+		                return `
+		                <li>
+		                    <div class="debt-header">
+		                        <span class="debt-name">${escapeHtml(debt.name || 'Debt')}</span>
+		                        <span class="debt-status">Active · ${debt.remainingMonths} months left</span>
+		                    </div>
+		                    <div class="debt-details">
+		                        <div class="debt-detail">💰 Total: <strong>$${debt.totalAmount.toFixed(2)}</strong></div>
+		                        <div class="debt-detail">📅 Monthly: <strong>$${debt.monthlyPayment.toFixed(2)}</strong></div>
+		                        <div class="debt-detail">💸 Remaining: <strong>$${debt.remainingAmount?.toFixed(2) || debt.totalAmount.toFixed(2)}</strong></div>
+		                        <div class="debt-detail">📆 Next payment: <strong>${debt.nextPaymentDate || 'N/A'}</strong></div>
+		                        ${debt.interestRate > 0 ? `<div class="debt-detail">📈 Interest: <strong>${debt.interestRate}% APR</strong></div>` : ''}
+		                    </div>
+		                    <div class="debt-progress">
+		                        <div class="progress-bar">
+		                            <div class="progress-fill" style="width: ${progressPercent}%"></div>
+		                        </div>
+		                        <div style="font-size: 11px; color: #6b7280; margin-top: 4px;">
+		                            ${progressPercent}% paid (${debt.totalMonths - debt.remainingMonths}/${debt.totalMonths} months)
+		                        </div>
+		                    </div>
+		                    <div class="debt-actions">
+		                        <button class="btn-pay" onclick="makePayment(${debt.id})">💰 Make Payment</button>
+		                        <button class="btn-history" onclick="showPaymentHistory(${debt.id})">📋 Payment History</button>
+		                    </div>
+		                </li>
+		            `}).join('');
+		        }
+		        
+		        // Mostrar deudas pagadas
+		        const paidDebtList = document.getElementById('paidDebtList');
+		        if (paidDebts.length === 0) {
+		            paidDebtList.innerHTML = '<li style="text-align: center; color: #9ca3af;">No paid debts yet</li>';
+		        } else {
+		            paidDebtList.innerHTML = paidDebts.map(debt => `
+		                <li class="paid">
+		                    <div class="debt-header">
+		                        <span class="debt-name">${escapeHtml(debt.name || 'Debt')}</span>
+		                        <span class="debt-status paid">✓ Paid off</span>
+		                    </div>
+		                    <div class="debt-details">
+		                        <div class="debt-detail">💰 Total: <strong>$${debt.totalAmount.toFixed(2)}</strong></div>
+		                        <div class="debt-detail">📅 Paid on: <strong>${debt.endDate || 'Completed'}</strong></div>
+		                        ${debt.interestRate > 0 ? `<div class="debt-detail">📈 Interest: <strong>${debt.interestRate}% APR</strong></div>` : ''}
+		                    </div>
+		                </li>
+		            `).join('');
+		        }
+		        
+		        // Verificar recordatorios
+		        checkReminders();
+		        
+		        // Update total debt
+		        const total = activeDebts.reduce((sum, debt) => sum + (debt.remainingAmount || debt.totalAmount), 0);
+		        document.getElementById('totalDebt').textContent = `$${total.toFixed(2)}`;
+		        updateBalance();
+		    } catch (error) {
+		        console.error('Error loading debts:', error);
+		    }
+		}
+		
+		async function makePayment(debtId) {
+		    if (confirm('Are you sure you want to record a payment for this debt?')) {
+		        try {
+		            const response = await fetch(`${API_BASE}/debts/${debtId}/pay`, {
+		                method: 'POST'
+		            });
+		            
+		            if (response.ok) {
+		                const updatedDebt = await response.json();
+		                if (!updatedDebt.active) {
+		                    showToast('🎉 Congratulations! You\'ve paid off this debt!', 'success');
+		                } else {
+		                    showToast(`Payment recorded! ${updatedDebt.remainingMonths} months remaining.`, 'success');
+		                }
+		                loadDebts();
+		            } else {
+		                alert('Error recording payment');
+		            }
+		        } catch (error) {
+		            console.error('Error:', error);
+		            alert('Error recording payment');
+		        }
+		    }
+		}
+		
+		async function showPaymentHistory(debtId) {
+		    try {
+		        const response = await fetch(`${API_BASE}/debts/${debtId}/payments`);
+		        const payments = await response.json();
+		        
+		        const debt = allDebts.find(d => d.id === debtId);
+		        
+		        const paymentList = document.getElementById('paymentHistoryList');
+		        if (payments.length === 0) {
+		            paymentList.innerHTML = '<p style="text-align: center; color: #9ca3af;">No payments recorded yet</p>';
+		        } else {
+		            paymentList.innerHTML = `
+		                <h4 style="margin-bottom: 12px;">${debt?.name || 'Debt'} - Payment History</h4>
+		                ${payments.map(payment => `
+		                    <div style="padding: 10px; border-bottom: 1px solid rgba(255,255,255,0.1);">
+		                        <div style="display: flex; justify-content: space-between;">
+		                            <span>📅 ${payment.paymentDate}</span>
+		                            <span>💰 Payment #${payment.monthNumber}</span>
+		                            <span><strong>$${payment.amount.toFixed(2)}</strong></span>
+		                        </div>
+		                    </div>
+		                `).join('')}
+		            `;
+		        }
+		        
+		        document.getElementById('paymentHistoryModal').style.display = 'block';
+		    } catch (error) {
+		        console.error('Error loading payments:', error);
+		        alert('Error loading payment history');
+		    }
+		}
+		
+		function closePaymentModal() {
+		    document.getElementById('paymentHistoryModal').style.display = 'none';
+		}
+		
+		async function checkReminders() {
+		    try {
+		        const response = await fetch(`${API_BASE}/debts/reminders`);
+		        const debtsWithReminder = await response.json();
+		        
+		        if (debtsWithReminder.length > 0) {
+		            const reminderDiv = document.getElementById('reminderAlert');
+		            const reminderMessage = document.getElementById('reminderMessage');
+		            
+		            if (debtsWithReminder.length === 1) {
+		                reminderMessage.innerHTML = `⏰ Reminder: You have a payment due soon for "${debtsWithReminder[0].name}". Next payment: $${debtsWithReminder[0].monthlyPayment} on ${debtsWithReminder[0].nextPaymentDate}`;
+		            } else {
+		                reminderMessage.innerHTML = `⏰ Reminder: You have ${debtsWithReminder.length} payments due soon! Check your active debts.`;
+		            }
+		            
+		            reminderDiv.style.display = 'block';
+		            
+		            // Auto-hide after 10 seconds
+		            setTimeout(() => {
+		                reminderDiv.style.display = 'none';
+		            }, 10000);
+		        } else {
+		            document.getElementById('reminderAlert').style.display = 'none';
+		        }
+		    } catch (error) {
+		        console.error('Error checking reminders:', error);
+		    }
+		}
+		
+		function closeReminder() {
+		    document.getElementById('reminderAlert').style.display = 'none';
+		}
+		
+		// Helper function to escape HTML
+		function escapeHtml(text) {
+		    if (!text) return '';
+		    const div = document.createElement('div');
+		    div.textContent = text;
+		    return div.innerHTML;
+		}
         
         // Balance calculation
         async function updateBalance() {
@@ -549,7 +1123,6 @@
         
         // Toast notification
         function showToast(message, type) {
-            // Create toast element if it doesn't exist
             let toast = document.getElementById('toast');
             if (!toast) {
                 toast = document.createElement('div');
@@ -574,8 +1147,12 @@
         // Close modal when clicking outside
         window.onclick = function(event) {
             const modal = document.getElementById('categoryModal');
+            const editModal = document.getElementById('editExpenseModal');
             if (event.target === modal) {
                 closeModal();
+            }
+            if (event.target === editModal) {
+                closeEditModal();
             }
         }
         

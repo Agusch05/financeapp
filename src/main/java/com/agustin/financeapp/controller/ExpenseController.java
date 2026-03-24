@@ -1,6 +1,7 @@
 package com.agustin.financeapp.controller;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.web.bind.annotation.*;
 
@@ -26,12 +27,15 @@ public class ExpenseController {
     public List<Expense> getAll() {
         return expenseService.getAll();
     }
+    
+    @GetMapping("/{id}")
+    public Optional<Expense> getById(@PathVariable Long id) {
+        return expenseService.getById(id);
+    }
 
     @PostMapping
     public Expense create(@RequestBody Expense expense) {
-        // Verificar si el usuario existe
         if (expense.getUser() != null && expense.getUser().getId() != null) {
-            // Buscar el usuario existente en la base de datos
             List<User> users = userService.getAllUsers();
             User existingUser = users.stream()
                 .filter(u -> u.getId().equals(expense.getUser().getId()))
@@ -40,21 +44,21 @@ public class ExpenseController {
             
             if (existingUser != null) {
                 expense.setUser(existingUser);
-            } else {
-                // Si no existe, crear un usuario por defecto o buscar el primero
-                if (!users.isEmpty()) {
-                    expense.setUser(users.get(0));
-                } else {
-                    // Si no hay usuarios, crear uno por defecto
-                    User defaultUser = new User();
-                    defaultUser.setName("Default");
-                    defaultUser.setPassword("default");
-                    User savedUser = userService.addUser(defaultUser);
-                    expense.setUser(savedUser);
-                }
+            } else if (!users.isEmpty()) {
+                expense.setUser(users.get(0));
             }
         }
-        
         return expenseService.save(expense);
+    }
+    
+    @PutMapping("/{id}")
+    public Expense update(@PathVariable Long id, @RequestBody Expense expense) {
+        expense.setId(id);
+        return expenseService.save(expense);
+    }
+    
+    @DeleteMapping("/{id}")
+    public void delete(@PathVariable Long id) {
+        expenseService.deleteById(id);
     }
 }

@@ -68,10 +68,31 @@
     document.getElementById('registerForm').addEventListener('submit', async (e) => {
         e.preventDefault();
         
-        const name = document.getElementById('name').value;
-        const nickname = document.getElementById('nickname').value;
+        const name = document.getElementById('name').value.trim();
+        const nickname = document.getElementById('nickname').value.trim();
         const password = document.getElementById('password').value;
         const confirmPassword = document.getElementById('confirmPassword').value;
+        
+        // Validaciones
+        if (!name || !nickname || !password) {
+            alert('All fields are required');
+            return;
+        }
+        
+        if (name.length < 3) {
+            alert('Name must be at least 3 characters');
+            return;
+        }
+        
+        if (nickname.length < 3) {
+            alert('Nickname must be at least 3 characters');
+            return;
+        }
+        
+        if (password.length < 5) {
+            alert('Password must be at least 5 characters');
+            return;
+        }
         
         if (password !== confirmPassword) {
             alert('Passwords do not match');
@@ -92,19 +113,16 @@
                 body: JSON.stringify(user)
             });
             
-            console.log('Response status:', response.status);
-            
             if (response.ok) {
                 const newUser = await response.json();
                 console.log('User created with ID:', newUser.id);
-                // Guardar el usuario con su ID real
                 localStorage.setItem('user', JSON.stringify(newUser));
-                alert('Account created successfully!');
+                alert('Account created successfully! Welcome to FinanceApp!');
                 window.location.href = 'dashboard.html';
             } else {
                 const errorText = await response.text();
                 console.error('Server error:', errorText);
-                alert('Error creating account: ' + errorText);
+                alert('Error creating account. Username may already exist.');
             }
         } catch (error) {
             console.error('Registration error:', error);
