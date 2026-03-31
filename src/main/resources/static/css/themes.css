@@ -3,21 +3,14 @@
 /* ============================================ */
 
 :root {
-    --bg-primary: #0a0a0a;
-    --bg-secondary: #1a1a1a;
-    --bg-card: rgba(20, 20, 20, 0.6);
-    --text-primary: #ffffff;
-    --text-secondary: #9ca3af;
-    --border-color: rgba(255, 255, 255, 0.05);
-    --accent-success: #10b981;
-    --accent-danger: #ef4444;
-    --accent-warning: #f59e0b;
-    --accent-info: #3b82f6;
-    --gradient-start: #ffffff;
-    --gradient-end: #888888;
-    --input-bg: rgba(0, 0, 0, 0.4);
-    --input-border: rgba(255, 255, 255, 0.1);
-    --hover-bg: rgba(255, 255, 255, 0.05);
+    /* Variables por defecto */
+    --custom-primary: #10b981;
+    --custom-analogous: #3b82f6;
+    --custom-complementary: #ef4444;
+    --custom-lighter: #34d399;
+    --custom-darker: #059669;
+    --custom-soft-bg: #064e3b;
+    --custom-soft-bg2: #065f46;
 }
 
 /* ============================================ */

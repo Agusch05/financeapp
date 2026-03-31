@@ -48,7 +48,7 @@
 
 .nav-links a:hover,
 .nav-links a.active {
-    color: var(--text-primary);
+    color: var(--custom-primary, #ffffff); 
 }
 
 .logout-btn {
