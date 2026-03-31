@@ -4,9 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FinanceApp | Dashboard</title>
-    <link rel="stylesheet" href="styles.css">
+    <!-- Fuentes -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- CSS Modular -->
+    <link rel="stylesheet" href="css/global.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/themes.css">
 </head>
 <body class="dashboard-body">
     <div class="dashboard-container">
@@ -25,6 +33,34 @@
                 <button class="logout-btn" onclick="logout()">Logout</button>
             </div>
         </nav>
+        <!-- Theme Switcher -->
+		<div class="theme-switcher">
+		    <div class="theme-btn" id="themeBtn" onclick="toggleThemeMenu()">
+		        <div class="theme-circle" id="currentThemeCircle" style="background: rgb(0, 0, 0);"></div>
+		    </div>
+		    <div class="theme-menu" id="themeMenu">
+		        <div class="theme-option" onclick="setTheme('dark')">
+		            <div class="theme-preview dark-preview"></div>
+		            <span>Dark</span>
+		        </div>
+		        <div class="theme-option" onclick="setTheme('light')">
+		            <div class="theme-preview light-preview"></div>
+		            <span>Light</span>
+		        </div>
+		        <div class="theme-option" onclick="setTheme('pink')">
+		            <div class="theme-preview pink-preview"></div>
+		            <span>Pink Purple</span>
+		        </div>
+		        <div class="theme-option" onclick="setTheme('blue')">
+		            <div class="theme-preview blue-preview"></div>
+		            <span>Ocean Blue</span>
+		        </div>
+		        <div class="theme-option" onclick="setTheme('orange')">
+		            <div class="theme-preview orange-preview"></div>
+		            <span>Sunset Orange</span>
+		        </div>
+		    </div>
+		</div>
 
         <!-- Dashboard Stats -->
         <div class="dashboard-stats">
@@ -1143,6 +1179,79 @@
             localStorage.removeItem('user');
             window.location.href = 'login.html';
         }
+     // Theme Switcher Functions
+        function toggleThemeMenu() {
+            const menu = document.getElementById('themeMenu');
+            menu.classList.toggle('active');
+        }
+
+        function closeThemeMenu() {
+            const menu = document.getElementById('themeMenu');
+            menu.classList.remove('active');
+        }
+
+        function setTheme(theme) {
+            const body = document.body;
+            const themeCircle = document.getElementById('currentThemeCircle');
+            
+            // Remover todas las clases de tema
+            body.classList.remove('theme-light', 'theme-pink', 'theme-blue', 'theme-orange');
+            
+            // Si no es dark, agregar la clase del tema
+            if (theme !== 'dark') {
+                body.classList.add(`theme-${theme}`);
+            }
+            
+            // Actualizar el círculo del botón según el tema
+            const themeColors = {
+                dark: '#000000',
+                light: '#F0E6E6',
+                pink: '#ec489a',
+                blue: '#0ea5e9',
+                orange: '#f97316'
+            };
+            
+            themeCircle.style.background = themeColors[theme];
+            
+            // Guardar preferencia en localStorage
+            localStorage.setItem('theme', theme);
+            
+            // Mostrar notificación
+            const themeNames = {
+                dark: 'Dark Mode',
+                light: 'Light Mode',
+                pink: 'Pink Purple',
+                blue: 'Ocean Blue',
+                orange: 'Sunset Orange'
+            };
+            
+            toast.success(`Theme changed to ${themeNames[theme]}! 🎨`);
+            
+            // Cerrar el menú
+            closeThemeMenu();
+        }
+
+        // Cargar tema guardado al iniciar
+        function loadSavedTheme() {
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme && savedTheme !== 'dark') {
+                setTheme(savedTheme);
+            } else {
+                // Asegurar que el círculo sea blanco para dark mode
+                document.getElementById('currentThemeCircle').style.background = '#ffffff';
+            }
+        }
+
+        // Cerrar menú al hacer clic fuera
+        document.addEventListener('click', function(event) {
+            const switcher = document.querySelector('.theme-switcher');
+            const menu = document.getElementById('themeMenu');
+            const btn = document.getElementById('themeBtn');
+            
+            if (switcher && !switcher.contains(event.target)) {
+                menu.classList.remove('active');
+            }
+        });
         
         // Close modal when clicking outside
         window.onclick = function(event) {
