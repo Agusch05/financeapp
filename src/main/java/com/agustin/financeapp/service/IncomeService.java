@@ -1,6 +1,8 @@
 package com.agustin.financeapp.service;
 
+import java.time.LocalDate;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
@@ -22,5 +24,11 @@ public class IncomeService {
     
     public Income addIncome(Income income) {
         return incomeRepository.save(income);
+    }
+    public List<Income> getCurrentIncomes() {
+        LocalDate today = LocalDate.now();
+        return incomeRepository.findAll().stream()
+            .filter(i -> i.getDate() == null || !i.getDate().isAfter(today))
+            .collect(Collectors.toList());
     }
 }

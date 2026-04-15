@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FinanceApp | Profile</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/global.css">
+    <link rel="stylesheet" href="css/profile.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/themes.css">
+    <!-- FullCalendar para el calendario -->
+    <link href='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css' rel='stylesheet' />
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js'></script>
+</head>
+<body class="dashboard-body">
+    <div class="dashboard-container">
+        <!-- Navigation -->
+        <nav class="dashboard-nav">
+            <div class="nav-logo">
+                <h2>FINANCE<span style="font-weight:300">APP</span></h2>
+            </div>
+            <div class="nav-links">
+                <a href="dashboard.html" data-tab="expenses">Dashboard</a>
+                <a href="#" class="active" data-tab="profile">Profile</a>
+            </div>
+            <div class="nav-user">
+                <span id="userNameDisplay"></span>
+                <button class="logout-btn" onclick="logout()">Logout</button>
+            </div>
+        </nav>
+
+        <!-- Color Picker -->
+        <div class="color-picker-container">
+            <div class="color-picker-btn" id="colorPickerBtn" onclick="toggleColorPicker()">
+                <div class="color-circle" id="currentColorCircle" style="background: #10b981;"></div>
+            </div>
+            <div class="color-picker-panel" id="colorPickerPanel">
+                <div class="color-picker-header">
+                    <h4>🎨 Choose a Color</h4>
+                    <button class="close-picker" onclick="toggleColorPicker()">×</button>
+                </div>
+                <div class="color-wheel-container">
+                    <input type="color" id="colorWheel" value="#10b981" onchange="applyColorTheme(this.value)">
+                </div>
+                <div class="preset-colors">
+                    <div class="preset-title">✨ Presets</div>
+                    <div class="preset-list">
+                        <div class="preset-color" style="background: #10b981;" onclick="applyColorTheme('#10b981')"></div>
+                        <div class="preset-color" style="background: #3b82f6;" onclick="applyColorTheme('#3b82f6')"></div>
+                        <div class="preset-color" style="background: #ef4444;" onclick="applyColorTheme('#ef4444')"></div>
+                        <div class="preset-color" style="background: #f59e0b;" onclick="applyColorTheme('#f59e0b')"></div>
+                        <div class="preset-color" style="background: #8b5cf6;" onclick="applyColorTheme('#8b5cf6')"></div>
+                        <div class="preset-color" style="background: #ec489a;" onclick="applyColorTheme('#ec489a')"></div>
+                        <div class="preset-color" style="background: #06b6d4;" onclick="applyColorTheme('#06b6d4')"></div>
+                        <div class="preset-color" style="background: #84cc16;" onclick="applyColorTheme('#84cc16')"></div>
+                    </div>
+                </div>
+                <div class="color-info">
+                    <div>Selected: <span id="selectedColorCode">#10b981</span></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="profile-grid">
+            <!-- Información del Usuario -->
+            <div class="card">
+                <h2>👤 User Information</h2>
+                <div class="profile-info">
+                    <div class="info-row">
+                        <span class="info-label">Name:</span>
+                        <span class="info-value" id="profileName">Loading...</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Nickname:</span>
+                        <span class="info-value" id="profileNickname">Loading...</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Member since:</span>
+                        <span class="info-value" id="memberSince">Loading...</span>
+                    </div>
+                </div>
+                <button class="btn-secondary" onclick="showChangePasswordModal()" style="margin-top: 20px;">🔒 Change Password</button>
+            </div>
+
+            <!-- Configuración de Salario Mensual -->
+            <div class="card">
+                <h2>💰 Monthly Salary 
+                    <span class="info-tip" data-tooltip="Set your monthly salary. It will be automatically added as income on the 1st of each month. You can edit or delete these automatic entries anytime.">
+                        ⓘ
+                    </span>
+                </h2>
+                <div class="form-group">
+                    <label>Monthly Salary ($)</label>
+                    <input type="number" id="monthlySalary" placeholder="0.00" step="0.01">
+                </div>
+                <div class="salary-status" id="salaryStatus"></div>
+                <button class="btn-primary" onclick="saveMonthlySalary()">Save Salary Setting</button>
+                <button class="btn-secondary" onclick="deleteFutureSalaryIncomes()" style="margin-top: 10px;">🗑️ Delete Future Salary Incomes</button>
+            </div>
+
+            <!-- Calendario -->
+            <div class="card calendar-card">
+                <h2>📅 Financial Calendar</h2>
+                <div id="calendar"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para cambiar contraseña -->
+    <div id="changePasswordModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Change Password</h3>
+                <span class="close" onclick="closeChangePasswordModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Current Password</label>
+                    <input type="password" id="currentPassword" placeholder="Enter current password">
+                </div>
+                <div class="form-group">
+                    <label>New Password</label>
+                    <input type="password" id="newPassword" placeholder="Min 5 characters">
+                </div>
+                <div class="form-group">
+                    <label>Confirm New Password</label>
+                    <input type="password" id="confirmNewPassword" placeholder="Confirm new password">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closeChangePasswordModal()">Cancel</button>
+                <button class="btn-primary" onclick="changePassword()">Update Password</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8080';
+        let currentUser = null;
+        let calendar = null;
+        let allEvents = [];
+
+        // ============================================
+        // COLOR THEME FUNCTIONS
+        // ============================================
+
+        function hexToRgb(hex) {
+            const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+            return result ? {
+                r: parseInt(result[1], 16),
+                g: parseInt(result[2], 16),
+                b: parseInt(result[3], 16)
+            } : null;
+        }
+
+        function rgbToHex(r, g, b) {
+            return '#' + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+        }
+
+        function rgbToHsl(r, g, b) {
+            r /= 255; g /= 255; b /= 255;
+            const max = Math.max(r, g, b);
+            const min = Math.min(r, g, b);
+            let h, s, l = (max + min) / 2;
+            if (max === min) { h = s = 0; } else {
+                const d = max - min;
+                s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+                switch (max) {
+                    case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+                    case g: h = (b - r) / d + 2; break;
+                    case b: h = (r - g) / d + 4; break;
+                }
+                h /= 6;
+            }
+            return { h: h * 360, s: s * 100, l: l * 100 };
+        }
+
+        function hslToRgb(h, s, l) {
+            h /= 360; s /= 100; l /= 100;
+            let r, g, b;
+            if (s === 0) {
+                r = g = b = l;
+            } else {
+                const hue2rgb = (p, q, t) => {
+                    if (t < 0) t += 1;
+                    if (t > 1) t -= 1;
+                    if (t < 1/6) return p + (q - p) * 6 * t;
+                    if (t < 1/2) return q;
+                    if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
+                    return p;
+                };
+                const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+                const p = 2 * l - q;
+                r = hue2rgb(p, q, h + 1/3);
+                g = hue2rgb(p, q, h);
+                b = hue2rgb(p, q, h - 1/3);
+            }
+            return { r: Math.round(r * 255), g: Math.round(g * 255), b: Math.round(b * 255) };
+        }
+
+        function generateColorPalette(baseHex) {
+            const rgb = hexToRgb(baseHex);
+            const hsl = rgbToHsl(rgb.r, rgb.g, rgb.b);
+            const hue = hsl.h;
+            const analogous1 = hslToRgb((hue - 30 + 360) % 360, Math.min(hsl.s + 10, 70), Math.min(hsl.l + 10, 75));
+            const analogous2 = hslToRgb((hue + 30) % 360, Math.min(hsl.s + 10, 70), Math.min(hsl.l + 10, 75));
+            let complementaryHue = (hue + 180) % 360;
+            let complementaryLightness = hsl.l > 60 ? hsl.l - 40 : hsl.l + 40;
+            complementaryLightness = Math.min(Math.max(complementaryLightness, 25), 75);
+            const complementary = hslToRgb(complementaryHue, Math.min(hsl.s + 20, 80), complementaryLightness);
+            const lighter = hslToRgb(hue, Math.min(hsl.s - 10, 60), Math.min(hsl.l + 25, 88));
+            const darker = hslToRgb(hue, Math.min(hsl.s + 15, 85), Math.max(hsl.l - 25, 12));
+            const softBg = hslToRgb((hue - 15) % 360, Math.max(hsl.s - 30, 15), Math.min(hsl.l + 40, 95));
+            const softBg2 = hslToRgb((hue + 15) % 360, Math.max(hsl.s - 30, 15), Math.min(hsl.l + 35, 93));
+            return {
+                primary: baseHex, analogous1: rgbToHex(analogous1.r, analogous1.g, analogous1.b),
+                analogous2: rgbToHex(analogous2.r, analogous2.g, analogous2.b),
+                complementary: rgbToHex(complementary.r, complementary.g, complementary.b),
+                lighter: rgbToHex(lighter.r, lighter.g, lighter.b),
+                darker: rgbToHex(darker.r, darker.g, darker.b),
+                softBg: rgbToHex(softBg.r, softBg.g, softBg.b),
+                softBg2: rgbToHex(softBg2.r, softBg2.g, softBg2.b)
+            };
+        }
+
+        function applyColorTheme(baseColor) {
+            const palette = generateColorPalette(baseColor);
+            localStorage.setItem('customTheme', baseColor);
+            const colorCircle = document.getElementById('currentColorCircle');
+            const selectedColorSpan = document.getElementById('selectedColorCode');
+            if (colorCircle) colorCircle.style.background = baseColor;
+            if (selectedColorSpan) selectedColorSpan.textContent = baseColor;
+            const colorWheel = document.getElementById('colorWheel');
+            if (colorWheel) colorWheel.value = baseColor;
+            const profileBody = document.querySelector('.dashboard-body');
+            if (profileBody) {
+                profileBody.style.background = `radial-gradient(ellipse at 20% 30%, ${palette.softBg}, ${palette.softBg2})`;
+            }
+            const containers = document.querySelectorAll('.dashboard-nav, .card, .modal-content');
+            containers.forEach(container => {
+                container.style.background = `rgba(${hexToRgb(palette.softBg).r}, ${hexToRgb(palette.softBg).g}, ${hexToRgb(palette.softBg).b}, 0.85)`;
+                container.style.borderColor = `rgba(${hexToRgb(palette.primary).r}, ${hexToRgb(palette.primary).g}, ${hexToRgb(palette.primary).b}, 0.3)`;
+            });
+            const primaryBtns = document.querySelectorAll('.btn-primary');
+            primaryBtns.forEach(btn => {
+                btn.style.background = `linear-gradient(135deg, ${palette.primary}, ${palette.darker})`;
+            });
+            const secondaryBtns = document.querySelectorAll('.btn-secondary');
+            secondaryBtns.forEach(btn => {
+                btn.style.borderColor = `rgba(${hexToRgb(palette.primary).r}, ${hexToRgb(palette.primary).g}, ${hexToRgb(palette.primary).b}, 0.5)`;
+                btn.style.color = palette.primary;
+            });
+            const allLabels = document.querySelectorAll('.form-group label');
+            allLabels.forEach(label => {
+                label.style.color = palette.complementary;
+            });
+            const cardTitles = document.querySelectorAll('.card h2');
+            cardTitles.forEach(title => {
+                title.style.color = palette.primary;
+            });
+            const style = document.createElement('style');
+            style.textContent = `
+                .form-group input:focus, .form-group select:focus {
+                    border-color: ${palette.primary} !important;
+                    box-shadow: 0 0 0 2px rgba(${hexToRgb(palette.primary).r}, ${hexToRgb(palette.primary).g}, ${hexToRgb(palette.primary).b}, 0.2) !important;
+                }
+                .card:hover {
+                    border-color: ${palette.primary} !important;
+                }
+                ::-webkit-scrollbar-thumb {
+                    background: ${palette.primary} !important;
+                }
+            `;
+            const oldStyle = document.getElementById('dynamic-theme-style');
+            if (oldStyle) oldStyle.remove();
+            style.id = 'dynamic-theme-style';
+            document.head.appendChild(style);
+            showColorToast(`Theme applied! 🎨`, palette.primary);
+        }
+
+        function showColorToast(message, color) {
+            let toast = document.getElementById('color-toast');
+            if (!toast) {
+                toast = document.createElement('div');
+                toast.id = 'color-toast';
+                toast.style.position = 'fixed';
+                toast.style.bottom = '20px';
+                toast.style.left = '50%';
+                toast.style.transform = 'translateX(-50%)';
+                toast.style.background = color;
+                toast.style.color = '#fff';
+                toast.style.padding = '12px 24px';
+                toast.style.borderRadius = '40px';
+                toast.style.fontSize = '14px';
+                toast.style.fontWeight = '500';
+                toast.style.zIndex = '10000';
+                toast.style.boxShadow = '0 4px 12px rgba(0,0,0,0.2)';
+                toast.style.opacity = '0';
+                toast.style.transition = 'opacity 0.3s ease';
+                document.body.appendChild(toast);
+            }
+            toast.textContent = message;
+            toast.style.background = color;
+            toast.style.opacity = '1';
+            setTimeout(() => { toast.style.opacity = '0'; }, 2000);
+        }
+
+        function loadSavedColorTheme() {
+            const savedColor = localStorage.getItem('customTheme');
+            if (savedColor) {
+                applyColorTheme(savedColor);
+                const colorWheel = document.getElementById('colorWheel');
+                if (colorWheel) colorWheel.value = savedColor;
+            }
+        }
+
+        function toggleColorPicker() {
+            const panel = document.getElementById('colorPickerPanel');
+            if (panel) panel.classList.toggle('active');
+        }
+
+        document.addEventListener('click', function(event) {
+            const container = document.querySelector('.color-picker-container');
+            const panel = document.getElementById('colorPickerPanel');
+            if (container && panel && !container.contains(event.target)) {
+                panel.classList.remove('active');
+            }
+        });
+
+        // ============================================
+        // PROFILE FUNCTIONS
+        // ============================================
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const user = localStorage.getItem('user');
+            if (!user) {
+                window.location.href = 'login.html';
+                return;
+            }
+            currentUser = JSON.parse(user);
+            document.getElementById('userNameDisplay').textContent = currentUser.name || currentUser.nickname;
+            document.getElementById('profileName').textContent = currentUser.name || 'Not set';
+            document.getElementById('profileNickname').textContent = currentUser.nickname || currentUser.name || 'User';
+            document.getElementById('memberSince').textContent = new Date().toLocaleDateString();
+            
+            loadMonthlySalary();
+            loadCalendarEvents();
+            initCalendar();
+            loadSavedColorTheme();
+        });
+
+        function logout() {
+            localStorage.removeItem('user');
+            window.location.href = 'login.html';
+        }
+
+        // Cambio de contraseña
+        function showChangePasswordModal() {
+            document.getElementById('changePasswordModal').style.display = 'block';
+            document.getElementById('currentPassword').value = '';
+            document.getElementById('newPassword').value = '';
+            document.getElementById('confirmNewPassword').value = '';
+        }
+
+        function closeChangePasswordModal() {
+            document.getElementById('changePasswordModal').style.display = 'none';
+        }
+
+        async function changePassword() {
+            const currentPassword = document.getElementById('currentPassword').value;
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmNewPassword').value;
+            
+            if (!currentPassword || !newPassword || !confirmPassword) {
+                showColorToast('Please fill all fields', '#f59e0b');
+                return;
+            }
+            
+            if (newPassword !== confirmPassword) {
+                showColorToast('New passwords do not match', '#ef4444');
+                return;
+            }
+            
+            if (newPassword.length < 5) {
+                showColorToast('New password must be at least 5 characters', '#f59e0b');
+                return;
+            }
+            
+            if (currentPassword !== currentUser.password) {
+                showColorToast('Current password is incorrect', '#ef4444');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE}/users/${currentUser.id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ ...currentUser, password: newPassword })
+                });
+                
+                if (response.ok) {
+                    const updatedUser = await response.json();
+                    localStorage.setItem('user', JSON.stringify(updatedUser));
+                    currentUser = updatedUser;
+                    showColorToast('Password changed successfully!', '#10b981');
+                    closeChangePasswordModal();
+                } else {
+                    showColorToast('Error changing password', '#ef4444');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showColorToast('Error connecting to server', '#ef4444');
+            }
+        }
+
+        // Salario mensual
+        async function loadMonthlySalary() {
+            const salary = localStorage.getItem(`salary_${currentUser.id}`);
+            if (salary) {
+                document.getElementById('monthlySalary').value = salary;
+                document.getElementById('salaryStatus').innerHTML = `<span style="color: #10b981;">✅ Salary set to $${salary}. Auto-income will be added on the 1st of each month.</span>`;
+            }
+        }
+
+        async function saveMonthlySalary() {
+            const salary = parseFloat(document.getElementById('monthlySalary').value);
+            if (isNaN(salary) || salary <= 0) {
+                showColorToast('Please enter a valid salary amount', '#f59e0b');
+                return;
+            }
+            
+            localStorage.setItem(`salary_${currentUser.id}`, salary);
+            document.getElementById('salaryStatus').innerHTML = `<span style="color: #10b981;">✅ Salary set to $${salary}. Auto-income will be added on the 1st of each month.</span>`;
+            showColorToast('Salary saved successfully!', '#10b981');
+            
+            // Generar incomes futuros
+            await generateFutureSalaryIncomes(salary);
+        }
+
+        async function generateFutureSalaryIncomes(salary) {
+            const today = new Date();
+            const currentYear = today.getFullYear();
+            const currentMonth = today.getMonth();
+            
+            // Generar para los próximos 12 meses
+            for (let i = 0; i < 12; i++) {
+                let targetMonth = currentMonth + i;
+                let targetYear = currentYear;
+                if (targetMonth > 11) {
+                    targetMonth -= 12;
+                    targetYear++;
+                }
+                const incomeDate = new Date(targetYear, targetMonth, 1);
+                
+                // Solo generar si la fecha es futura
+                if (incomeDate > today) {
+                    const income = {
+                        amount: salary,
+                        date: incomeDate.toISOString().split('T')[0],
+                        source: '💰 Monthly Salary (Auto)'
+                    };
+                    
+                    try {
+                        await fetch(`${API_BASE}/incomes`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(income)
+                        });
+                    } catch (error) {
+                        console.error('Error generating salary income:', error);
+                    }
+                }
+            }
+            showColorToast('Future salary incomes generated!', '#10b981');
+        }
+
+        async function deleteFutureSalaryIncomes() {
+            try {
+                const response = await fetch(`${API_BASE}/incomes`);
+                const incomes = await response.json();
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                
+                for (const income of incomes) {
+                    if (income.source === '💰 Monthly Salary (Auto)') {
+                        const incomeDate = new Date(income.date);
+                        if (incomeDate > today) {
+                            await fetch(`${API_BASE}/incomes/${income.id}`, { method: 'DELETE' });
+                        }
+                    }
+                }
+                showColorToast('Future salary incomes deleted!', '#10b981');
+            } catch (error) {
+                console.error('Error:', error);
+                showColorToast('Error deleting future salary incomes', '#ef4444');
+            }
+        }
+
+        // Calendario
+        async function loadCalendarEvents() {
+            try {
+                const [expensesRes, incomesRes, debtsRes] = await Promise.all([
+                    fetch(`${API_BASE}/expenses`),
+                    fetch(`${API_BASE}/incomes`),
+                    fetch(`${API_BASE}/debts`)
+                ]);
+                
+                const expenses = await expensesRes.json();
+                const incomes = await incomesRes.json();
+                const debts = await debtsRes.json();
+                
+                allEvents = [];
+                
+                expenses.forEach(exp => {
+                    if (exp.date) {
+                        allEvents.push({
+                            title: `💸 Expense: $${exp.amount}`,
+                            date: exp.date,
+                            backgroundColor: '#ef4444',
+                            borderColor: '#ef4444',
+                            extendedProps: { type: 'expense', amount: exp.amount, description: exp.description }
+                        });
+                    }
+                });
+                
+                incomes.forEach(inc => {
+                    if (inc.date) {
+                        allEvents.push({
+                            title: `💰 Income: $${inc.amount}`,
+                            date: inc.date,
+                            backgroundColor: '#10b981',
+                            borderColor: '#10b981',
+                            extendedProps: { type: 'income', amount: inc.amount, source: inc.source }
+                        });
+                    }
+                });
+                
+                debts.forEach(debt => {
+                    if (debt.startDate && debt.active) {
+                        allEvents.push({
+                            title: `💳 Debt: ${debt.name}`,
+                            date: debt.startDate,
+                            backgroundColor: '#f59e0b',
+                            borderColor: '#f59e0b',
+                            extendedProps: { type: 'debt', amount: debt.totalAmount, remaining: debt.remainingMonths }
+                        });
+                    }
+                    if (debt.endDate && !debt.active) {
+                        allEvents.push({
+                            title: `✅ Debt Paid: ${debt.name}`,
+                            date: debt.endDate,
+                            backgroundColor: '#6b7280',
+                            borderColor: '#6b7280',
+                            extendedProps: { type: 'debt_paid', name: debt.name }
+                        });
+                    }
+                });
+            } catch (error) {
+                console.error('Error loading calendar events:', error);
+            }
+        }
+
+        function initCalendar() {
+            const calendarEl = document.getElementById('calendar');
+            if (calendarEl) {
+                calendar = new FullCalendar.Calendar(calendarEl, {
+                    initialView: 'dayGridMonth',
+                    headerToolbar: {
+                        left: 'prev,next today',
+                        center: 'title',
+                        right: 'dayGridMonth,dayGridWeek'
+                    },
+                    events: allEvents,
+                    eventClick: function(info) {
+                        const event = info.event;
+                        const props = event.extendedProps;
+                        let message = '';
+                        if (props.type === 'expense') {
+                            message = `Expense: $${props.amount}\nDescription: ${props.description || 'No description'}`;
+                        } else if (props.type === 'income') {
+                            message = `Income: $${props.amount}\nSource: ${props.source || 'Unknown'}`;
+                        } else if (props.type === 'debt') {
+                            message = `Debt: $${props.amount}\nRemaining months: ${props.remaining}`;
+                        } else if (props.type === 'debt_paid') {
+                            message = `Debt "${props.name}" was paid off! 🎉`;
+                        }
+                        alert(message);
+                    },
+                    height: 500,
+                    themeSystem: 'standard'
+                });
+                calendar.render();
+            }
+        }
+
+        async function refreshCalendar() {
+            await loadCalendarEvents();
+            if (calendar) {
+                calendar.removeAllEvents();
+                calendar.addEventSource(allEvents);
+            }
+        }
+
+        setInterval(refreshCalendar, 30000);
+    </script>
+</body>
+</html>

@@ -16,39 +16,6 @@
 </head>
 <body class="login-body">
     <div class="particles"></div>
-    
-    <!-- Color Picker - Selector de color universal -->
-    <div class="color-picker-container">
-        <div class="color-picker-btn" id="colorPickerBtn" onclick="toggleColorPicker()">
-            <div class="color-circle" id="currentColorCircle" style="background: #10b981;"></div>
-        </div>
-        <div class="color-picker-panel" id="colorPickerPanel">
-            <div class="color-picker-header">
-                <h4>🎨 Choose Your Color</h4>
-                <button class="close-picker" onclick="toggleColorPicker()">×</button>
-            </div>
-            <div class="color-wheel-container">
-                <input type="color" id="colorWheel" value="#10b981" onchange="applyColorTheme(this.value)">
-            </div>
-            <div class="preset-colors">
-                <div class="preset-title">✨ Presets</div>
-                <div class="preset-list">
-                    <div class="preset-color" style="background: #10b981;" onclick="applyColorTheme('#10b981')"></div>
-                    <div class="preset-color" style="background: #3b82f6;" onclick="applyColorTheme('#3b82f6')"></div>
-                    <div class="preset-color" style="background: #ef4444;" onclick="applyColorTheme('#ef4444')"></div>
-                    <div class="preset-color" style="background: #f59e0b;" onclick="applyColorTheme('#f59e0b')"></div>
-                    <div class="preset-color" style="background: #8b5cf6;" onclick="applyColorTheme('#8b5cf6')"></div>
-                    <div class="preset-color" style="background: #ec489a;" onclick="applyColorTheme('#ec489a')"></div>
-                    <div class="preset-color" style="background: #06b6d4;" onclick="applyColorTheme('#06b6d4')"></div>
-                    <div class="preset-color" style="background: #84cc16;" onclick="applyColorTheme('#84cc16')"></div>
-                </div>
-            </div>
-            <div class="color-info">
-                <div>Selected: <span id="selectedColorCode">#10b981</span></div>
-            </div>
-        </div>
-    </div>
-
     <div class="glass-container">
         <div class="logo-container">
             <div class="logo-icon">
@@ -105,194 +72,41 @@
     <script>
         const API_BASE = 'http://localhost:8080';
         
-        // ============================================
-        // COLOR THEME GENERATOR - ARMONÍAS DE COLOR
-        // (Mismo código que en login.html)
-        // ============================================
-        
-        function hexToRgb(hex) {
-            const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-            return result ? {
-                r: parseInt(result[1], 16),
-                g: parseInt(result[2], 16),
-                b: parseInt(result[3], 16)
-            } : null;
-        }
-        
-        function rgbToHex(r, g, b) {
-            return '#' + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
-        }
-        
-        function rgbToHsl(r, g, b) {
-            r /= 255;
-            g /= 255;
-            b /= 255;
-            const max = Math.max(r, g, b);
-            const min = Math.min(r, g, b);
-            let h, s, l = (max + min) / 2;
-        
-            if (max === min) {
-                h = s = 0;
-            } else {
-                const d = max - min;
-                s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
-                switch (max) {
-                    case r: h = (g - b) / d + (g < b ? 6 : 0); break;
-                    case g: h = (b - r) / d + 2; break;
-                    case b: h = (r - g) / d + 4; break;
-                }
-                h /= 6;
-            }
-            return { h: h * 360, s: s * 100, l: l * 100 };
-        }
-        
-        function hslToRgb(h, s, l) {
-            h /= 360;
-            s /= 100;
-            l /= 100;
-            let r, g, b;
-            if (s === 0) {
-                r = g = b = l;
-            } else {
-                const hue2rgb = (p, q, t) => {
-                    if (t < 0) t += 1;
-                    if (t > 1) t -= 1;
-                    if (t < 1/6) return p + (q - p) * 6 * t;
-                    if (t < 1/2) return q;
-                    if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
-                    return p;
-                };
-                const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
-                const p = 2 * l - q;
-                r = hue2rgb(p, q, h + 1/3);
-                g = hue2rgb(p, q, h);
-                b = hue2rgb(p, q, h - 1/3);
-            }
-            return { r: Math.round(r * 255), g: Math.round(g * 255), b: Math.round(b * 255) };
-        }
-        
-        function generateColorPalette(baseHex) {
-            const rgb = hexToRgb(baseHex);
-            const hsl = rgbToHsl(rgb.r, rgb.g, rgb.b);
-            const hue = hsl.h;
-            
-            const analogous1 = hslToRgb((hue - 30 + 360) % 360, hsl.s, hsl.l);
-            const analogous2 = hslToRgb((hue + 30) % 360, hsl.s, hsl.l);
-            const complementary = hslToRgb((hue + 180) % 360, hsl.s, hsl.l);
-            const lighter = hslToRgb(hue, Math.min(hsl.s + 15, 80), Math.min(hsl.l + 20, 85));
-            const darker = hslToRgb(hue, Math.max(hsl.s - 10, 20), Math.max(hsl.l - 20, 15));
-            const softBg = hslToRgb((hue - 15) % 360, Math.max(hsl.s - 30, 15), Math.min(hsl.l + 35, 92));
-            const softBg2 = hslToRgb((hue + 15) % 360, Math.max(hsl.s - 30, 15), Math.min(hsl.l + 30, 90));
-            
-            return {
-                primary: baseHex,
-                analogous1: rgbToHex(analogous1.r, analogous1.g, analogous1.b),
-                analogous2: rgbToHex(analogous2.r, analogous2.g, analogous2.b),
-                complementary: rgbToHex(complementary.r, complementary.g, complementary.b),
-                lighter: rgbToHex(lighter.r, lighter.g, lighter.b),
-                darker: rgbToHex(darker.r, darker.g, darker.b),
-                softBg: rgbToHex(softBg.r, softBg.g, softBg.b),
-                softBg2: rgbToHex(softBg2.r, softBg2.g, softBg2.b)
-            };
-        }
-        
-        function applyColorTheme(baseColor) {
-            const palette = generateColorPalette(baseColor);
-            localStorage.setItem('customTheme', baseColor);
-            
-            const colorCircle = document.getElementById('currentColorCircle');
-            const selectedColorSpan = document.getElementById('selectedColorCode');
-            const colorWheel = document.getElementById('colorWheel');
-            
-            if (colorCircle) colorCircle.style.background = baseColor;
-            if (selectedColorSpan) selectedColorSpan.textContent = baseColor;
-            if (colorWheel) colorWheel.value = baseColor;
-            
-            const loginBody = document.querySelector('.login-body');
-            if (loginBody) {
-                loginBody.style.background = `radial-gradient(ellipse at 20% 30%, ${palette.softBg}, ${palette.softBg2})`;
-            }
-            
-            const glassContainer = document.querySelector('.glass-container');
-            if (glassContainer) {
-                glassContainer.style.background = `rgba(${hexToRgb(palette.softBg).r}, ${hexToRgb(palette.softBg).g}, ${hexToRgb(palette.softBg).b}, 0.85)`;
-                glassContainer.style.borderColor = `rgba(${hexToRgb(palette.primary).r}, ${hexToRgb(palette.primary).g}, ${hexToRgb(palette.primary).b}, 0.3)`;
-            }
-            
-            const primaryBtn = document.querySelector('.btn-primary');
-            if (primaryBtn) {
-                primaryBtn.style.background = `linear-gradient(135deg, ${palette.primary}, ${palette.darker})`;
-            }
-            
-            const links = document.querySelectorAll('.auth-footer a');
-            links.forEach(link => {
-                link.style.color = palette.primary;
-            });
-            
-            const style = document.createElement('style');
-            style.textContent = `
-                .input-group input:focus + .input-border {
-                    background: linear-gradient(90deg, transparent, ${palette.primary}, ${palette.primary}, transparent) !important;
-                }
-            `;
-            
-            const oldStyle = document.getElementById('dynamic-theme-style');
-            if (oldStyle) oldStyle.remove();
-            
-            style.id = 'dynamic-theme-style';
-            document.head.appendChild(style);
-            
-            showColorToast(`Theme applied! 🎨`, palette.primary);
-        }
-        
-        function showColorToast(message, color) {
-            const toast = document.createElement('div');
-            toast.textContent = message;
-            toast.style.position = 'fixed';
-            toast.style.bottom = '20px';
-            toast.style.left = '50%';
-            toast.style.transform = 'translateX(-50%)';
-            toast.style.background = color;
-            toast.style.color = 'white';
-            toast.style.padding = '12px 24px';
-            toast.style.borderRadius = '40px';
-            toast.style.fontSize = '14px';
-            toast.style.fontWeight = '500';
-            toast.style.zIndex = '10000';
-            toast.style.boxShadow = '0 4px 12px rgba(0,0,0,0.2)';
-            toast.style.animation = 'fadeInUp 0.3s ease';
-            document.body.appendChild(toast);
-            
-            setTimeout(() => {
-                toast.style.opacity = '0';
-                setTimeout(() => toast.remove(), 300);
-            }, 2000);
-        }
-        
-        function loadSavedColorTheme() {
-            const savedColor = localStorage.getItem('customTheme');
-            if (savedColor) {
-                applyColorTheme(savedColor);
-            }
-        }
-        
-        function toggleColorPicker() {
-            const panel = document.getElementById('colorPickerPanel');
-            if (panel) panel.classList.toggle('active');
-        }
-        
-        document.addEventListener('click', function(event) {
-            const container = document.querySelector('.color-picker-container');
-            const panel = document.getElementById('colorPickerPanel');
-            if (container && panel && !container.contains(event.target)) {
-                panel.classList.remove('active');
-            }
-        });
         
         // ============================================
         // REGISTER FUNCTIONALITY
         // ============================================
-        
+        // Toast temporal para mostrar notificaciones
+		function showColorToast(message, color) {
+		    let toast = document.getElementById('color-toast');
+		    if (!toast) {
+		        toast = document.createElement('div');
+		        toast.id = 'color-toast';
+		        toast.style.position = 'fixed';
+		        toast.style.bottom = '20px';
+		        toast.style.left = '50%';
+		        toast.style.transform = 'translateX(-50%)';
+		        toast.style.background = color;
+		        toast.style.color = '#fff';
+		        toast.style.padding = '12px 24px';
+		        toast.style.borderRadius = '40px';
+		        toast.style.fontSize = '14px';
+		        toast.style.fontWeight = '500';
+		        toast.style.zIndex = '10000';
+		        toast.style.boxShadow = '0 4px 12px rgba(0,0,0,0.2)';
+		        toast.style.opacity = '0';
+		        toast.style.transition = 'opacity 0.3s ease';
+		        document.body.appendChild(toast);
+		    }
+		    
+		    toast.textContent = message;
+		    toast.style.background = color;
+		    toast.style.opacity = '1';
+		    
+		    setTimeout(() => {
+		        toast.style.opacity = '0';
+		    }, 2000);
+		}
         document.getElementById('registerForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
@@ -360,9 +174,6 @@
                 submitBtn.disabled = false;
             }
         });
-        
-        // Inicializar tema
-        loadSavedColorTheme();
     </script>
 </body>
 </html>

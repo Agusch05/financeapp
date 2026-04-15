@@ -59,10 +59,8 @@ public class DebtService {
             throw new RuntimeException("Esta deuda ya está pagada");
         }
         
-        // Calcular número de cuota
         int monthNumber = debt.getTotalMonths() - debt.getRemainingMonths() + 1;
         
-        // Registrar el pago
         Payment payment = new Payment(
             debt.getMonthlyPayment(),
             LocalDate.now(),
@@ -71,9 +69,11 @@ public class DebtService {
         );
         
         paymentRepository.save(payment);
-        
-        // Procesar el pago en la deuda
         debt.processPayment();
+        
+        if (!debt.isActive()) {
+            debt.setEndDate(LocalDate.now());
+        }
         
         return debtRepository.save(debt);
     }

@@ -1,0 +1,133 @@
+/* Profile Page Styles */
+.profile-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 24px;
+}
+
+.profile-info {
+    margin-top: 16px;
+}
+
+.info-row {
+    display: flex;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.info-label {
+    width: 120px;
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+.info-value {
+    flex: 1;
+    color: var(--text-primary);
+    font-weight: 500;
+}
+
+.salary-status {
+    margin: 12px 0;
+    padding: 10px;
+    border-radius: 8px;
+    background: rgba(16, 185, 129, 0.1);
+    font-size: 13px;
+}
+
+/* Tooltip para el ícono de información */
+.info-tip {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    background: var(--accent-info);
+    color: white;
+    border-radius: 50%;
+    font-size: 11px;
+    font-weight: bold;
+    cursor: help;
+    margin-left: 8px;
+    position: relative;
+}
+
+.info-tip:hover::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--bg-card);
+    color: var(--text-primary);
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 12px;
+    white-space: nowrap;
+    z-index: 1000;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+/* Calendario */
+.calendar-card {
+    grid-column: span 2;
+}
+
+#calendar {
+    background: var(--bg-card);
+    border-radius: 16px;
+    padding: 16px;
+}
+
+/* FullCalendar overrides */
+.fc {
+    color: var(--text-primary) !important;
+}
+
+.fc .fc-toolbar-title {
+    color: var(--text-primary) !important;
+}
+
+.fc .fc-button-primary {
+    background: var(--accent-info) !important;
+    border-color: var(--accent-info) !important;
+}
+
+.fc .fc-button-primary:hover {
+    background: var(--accent-success) !important;
+}
+
+.fc .fc-daygrid-day-number {
+    color: var(--text-primary) !important;
+}
+
+.fc .fc-col-header-cell-cushion {
+    color: var(--text-primary) !important;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .profile-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .calendar-card {
+        grid-column: span 1;
+    }
+    
+    .info-row {
+        flex-direction: column;
+        gap: 4px;
+    }
+    
+    .info-label {
+        width: auto;
+    }
+    
+    .info-tip:hover::after {
+        white-space: normal;
+        width: 200px;
+        text-align: center;
+    }
+}

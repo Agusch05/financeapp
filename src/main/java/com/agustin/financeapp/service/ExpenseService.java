@@ -1,7 +1,9 @@
 package com.agustin.financeapp.service;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,5 +35,11 @@ public class ExpenseService {
     
     public void deleteById(Long id) {
         expenseRepository.deleteById(id);
+    }
+    public List<Expense> getCurrentExpenses() {
+        LocalDate today = LocalDate.now();
+        return expenseRepository.findAll().stream()
+            .filter(e -> e.getDate() == null || !e.getDate().isAfter(today))
+            .collect(Collectors.toList());
     }
 }

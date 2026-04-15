@@ -514,3 +514,43 @@
     font-weight: 600;
     font-family: monospace;
 }
+/* Estilos base para textos dinámicos */
+.form-group label,
+.input-group label {
+    transition: color 0.3s ease;
+    font-weight: 500;
+}
+
+.card h2,
+.modal-header h3 {
+    transition: color 0.3s ease;
+    font-weight: 600;
+}
+
+.stat-card h3 {
+    transition: color 0.3s ease;
+    letter-spacing: 0.5px;
+}
+
+.nav-links a {
+    transition: color 0.3s ease;
+    font-weight: 500;
+}
+
+.debt-detail {
+    transition: color 0.3s ease;
+    font-size: 13px;
+}
+
+.debt-detail strong {
+    transition: color 0.3s ease;
+}
+
+.expense-list li div:last-child {
+    transition: color 0.3s ease;
+}
+
+/* Animación suave para cambios de tema */
+* {
+    transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+}
