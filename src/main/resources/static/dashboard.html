@@ -1392,13 +1392,41 @@
         
         // Balance calculation
         async function updateBalance() {
-            const totalIncome = parseFloat(document.getElementById('totalIncome').textContent.replace('$', '')) || 0;
-            const totalExpenses = parseFloat(document.getElementById('totalExpenses').textContent.replace('$', '')) || 0;
-            const balance = totalIncome - totalExpenses;
-            const balanceElement = document.getElementById('totalBalance');
-            balanceElement.textContent = `$${balance.toFixed(2)}`;
-            balanceElement.style.color = balance >= 0 ? '#10b981' : '#ef4444';
-        }
+		    // Obtener incomes y expenses actuales (sin filtrar aún)
+		    const incomesResponse = await fetch(`${API_BASE}/incomes`);
+		    const expensesResponse = await fetch(`${API_BASE}/expenses`);
+		    
+		    let allIncomes = await incomesResponse.json();
+		    let allExpenses = await expensesResponse.json();
+		    
+		    const today = new Date();
+		    today.setHours(0, 0, 0, 0); // Normalizar a inicio del día
+		    
+		    // Filtrar solo los que tienen fecha <= hoy
+		    const currentIncomes = allIncomes.filter(inc => {
+		        if (!inc.date) return true; // Si no tiene fecha, se considera actual
+		        const incDate = new Date(inc.date);
+		        incDate.setHours(0, 0, 0, 0);
+		        return incDate <= today;
+		    });
+		    
+		    const currentExpenses = allExpenses.filter(exp => {
+		        if (!exp.date) return true;
+		        const expDate = new Date(exp.date);
+		        expDate.setHours(0, 0, 0, 0);
+		        return expDate <= today;
+		    });
+		    
+		    const totalIncome = currentIncomes.reduce((sum, inc) => sum + inc.amount, 0);
+		    const totalExpenses = currentExpenses.reduce((sum, exp) => sum + exp.amount, 0);
+		    const balance = totalIncome - totalExpenses;
+		    
+		    document.getElementById('totalIncome').textContent = `$${totalIncome.toFixed(2)}`;
+		    document.getElementById('totalExpenses').textContent = `$${totalExpenses.toFixed(2)}`;
+		    const balanceElement = document.getElementById('totalBalance');
+		    balanceElement.textContent = `$${balance.toFixed(2)}`;
+		    balanceElement.style.color = balance >= 0 ? 'var(--accent-success)' : 'var(--accent-danger)';
+		    }
         
         // Toast notification
         function showToast(message, type) {

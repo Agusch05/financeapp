@@ -1,12 +1,40 @@
-/* Profile Page Styles */
+/* ============================================ */
+/* PROFILE PAGE - ESTILOS MEJORADOS */
+/* ============================================ */
+
 .profile-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
     gap: 24px;
+    margin-top: 20px;
 }
 
+/* Tarjetas de información */
+.card {
+    background: var(--bg-card);
+    backdrop-filter: blur(10px);
+    border-radius: 24px;
+    padding: 24px;
+    border: 1px solid var(--border-color);
+    transition: transform 0.3s, border-color 0.3s;
+}
+
+.card:hover {
+    border-color: var(--accent-info);
+    transform: translateY(-4px);
+}
+
+.card h2 {
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+    color: var(--text-primary);
+    border-left: 4px solid var(--accent-success);
+    padding-left: 12px;
+}
+
+/* Información del usuario */
 .profile-info {
-    margin-top: 16px;
+    margin: 20px 0;
 }
 
 .info-row {
@@ -27,25 +55,28 @@
     font-weight: 500;
 }
 
+/* Estado del salario */
 .salary-status {
-    margin: 12px 0;
-    padding: 10px;
-    border-radius: 8px;
     background: rgba(16, 185, 129, 0.1);
+    border-radius: 12px;
+    padding: 12px;
+    margin: 15px 0;
     font-size: 13px;
+    color: var(--text-secondary);
+    text-align: center;
 }
 
-/* Tooltip para el ícono de información */
+/* Tooltip del ícono de información */
 .info-tip {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 18px;
-    height: 18px;
+    width: 20px;
+    height: 20px;
     background: var(--accent-info);
     color: white;
     border-radius: 50%;
-    font-size: 11px;
+    font-size: 12px;
     font-weight: bold;
     cursor: help;
     margin-left: 8px;
@@ -55,7 +86,7 @@
 .info-tip:hover::after {
     content: attr(data-tooltip);
     position: absolute;
-    bottom: 100%;
+    bottom: 125%;
     left: 50%;
     transform: translateX(-50%);
     background: var(--bg-card);
@@ -69,6 +100,24 @@
     box-shadow: 0 4px 12px rgba(0,0,0,0.2);
 }
 
+/* Botones dentro del perfil */
+.btn-secondary {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    padding: 10px 20px;
+    border-radius: 40px;
+    cursor: pointer;
+    transition: all 0.3s;
+    width: 100%;
+    text-align: center;
+}
+
+.btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
+}
+
 /* Calendario */
 .calendar-card {
     grid-column: span 2;
@@ -78,9 +127,10 @@
     background: var(--bg-card);
     border-radius: 16px;
     padding: 16px;
+    margin-top: 10px;
 }
 
-/* FullCalendar overrides */
+/* Ajustes para FullCalendar */
 .fc {
     color: var(--text-primary) !important;
 }
@@ -111,20 +161,16 @@
     .profile-grid {
         grid-template-columns: 1fr;
     }
-    
     .calendar-card {
         grid-column: span 1;
     }
-    
     .info-row {
         flex-direction: column;
-        gap: 4px;
+        gap: 5px;
     }
-    
     .info-label {
         width: auto;
     }
-    
     .info-tip:hover::after {
         white-space: normal;
         width: 200px;
