@@ -48,19 +48,20 @@
 		        <div class="color-wheel-container">
 		            <input type="color" id="colorWheel" value="#10b981" onchange="applyColorTheme(this.value)">
 		        </div>
-		        <div class="preset-colors">
-		            <div class="preset-title">🎨 Presets</div>
-		            <div class="preset-list">
-		                <div class="preset-color" style="background: #10b981;" onclick="applyColorTheme('#10b981')"></div>
-		                <div class="preset-color" style="background: #3b82f6;" onclick="applyColorTheme('#3b82f6')"></div>
-		                <div class="preset-color" style="background: #ef4444;" onclick="applyColorTheme('#ef4444')"></div>
-		                <div class="preset-color" style="background: #f59e0b;" onclick="applyColorTheme('#f59e0b')"></div>
-		                <div class="preset-color" style="background: #8b5cf6;" onclick="applyColorTheme('#8b5cf6')"></div>
-		                <div class="preset-color" style="background: #ec489a;" onclick="applyColorTheme('#ec489a')"></div>
-		                <div class="preset-color" style="background: #06b6d4;" onclick="applyColorTheme('#06b6d4')"></div>
-		                <div class="preset-color" style="background: #84cc16;" onclick="applyColorTheme('#84cc16')"></div>
-		            </div>
-		        </div>
+				<div class="preset-colors">
+				    <div class="preset-title">✨ Presets</div>
+				    <div class="preset-list">
+				        <div class="preset-color dark-preset" onclick="applyColorTheme('dark')" title="Dark Mode (Original)"></div>
+				        <div class="preset-color" style="background: #10b981;" onclick="applyColorTheme('#10b981')"></div>
+				        <div class="preset-color" style="background: #3b82f6;" onclick="applyColorTheme('#3b82f6')"></div>
+				        <div class="preset-color" style="background: #ef4444;" onclick="applyColorTheme('#ef4444')"></div>
+				        <div class="preset-color" style="background: #f59e0b;" onclick="applyColorTheme('#f59e0b')"></div>
+				        <div class="preset-color" style="background: #8b5cf6;" onclick="applyColorTheme('#8b5cf6')"></div>
+				        <div class="preset-color" style="background: #ec489a;" onclick="applyColorTheme('#ec489a')"></div>
+				        <div class="preset-color" style="background: #06b6d4;" onclick="applyColorTheme('#06b6d4')"></div>
+				        <div class="preset-color" style="background: #84cc16;" onclick="applyColorTheme('#84cc16')"></div>
+				    </div>
+				</div>
 		        <div class="color-info">
 		            <div>Selected: <span id="selectedColorCode">#10b981</span></div>
 		        </div>
@@ -1618,144 +1619,229 @@
 
      // Aplicar el tema de color a la página
      function applyColorTheme(baseColor) {
-         const palette = generateColorPalette(baseColor);
-         
-         // Guardar en localStorage
-         localStorage.setItem('customTheme', baseColor);
-         
-         // Actualizar el círculo del botón
-         const colorCircle = document.getElementById('currentColorCircle');
-         const selectedColorSpan = document.getElementById('selectedColorCode');
-         if (colorCircle) colorCircle.style.background = baseColor;
-         if (selectedColorSpan) selectedColorSpan.textContent = baseColor;
-         
-         // Actualizar el color wheel
-         const colorWheel = document.getElementById('colorWheel');
-         if (colorWheel) colorWheel.value = baseColor;
-         
-         // Aplicar fondo de la página
-         const dashboardBody = document.querySelector('.dashboard-body');
-         if (dashboardBody) {
-             dashboardBody.style.background = `radial-gradient(ellipse at 20% 30%, ${palette.softBg}, ${palette.softBg2})`;
-         }
-         
-         // Contenedores
-         const containers = document.querySelectorAll('.dashboard-nav, .card, .stat-card, .modal-content');
-         containers.forEach(container => {
-             container.style.background = `rgba(${hexToRgb(palette.softBg).r}, ${hexToRgb(palette.softBg).g}, ${hexToRgb(palette.softBg).b}, 0.85)`;
-             container.style.borderColor = `rgba(${hexToRgb(palette.primary).r}, ${hexToRgb(palette.primary).g}, ${hexToRgb(palette.primary).b}, 0.3)`;
-         });
-         
-         // Botones primarios
-         const primaryBtns = document.querySelectorAll('.btn-primary');
-         primaryBtns.forEach(btn => {
-             btn.style.background = `linear-gradient(135deg, ${palette.primary}, ${palette.darker})`;
-         });
-         
-         // Botones de pago
-         const payBtns = document.querySelectorAll('.btn-pay');
-         payBtns.forEach(btn => {
-             btn.style.background = `linear-gradient(135deg, ${palette.primary}, ${palette.darker})`;
-         });
-         
-         // Botones secundarios
-         const secondaryBtns = document.querySelectorAll('.btn-secondary, .btn-secondary-small');
-         secondaryBtns.forEach(btn => {
-             btn.style.borderColor = `rgba(${hexToRgb(palette.primary).r}, ${hexToRgb(palette.primary).g}, ${hexToRgb(palette.primary).b}, 0.5)`;
-             btn.style.color = palette.primary;
-         });
-         
-         // Labels de formularios
-         const allLabels = document.querySelectorAll('.form-group label, .input-group label');
-         allLabels.forEach(label => {
-             label.style.color = palette.complementary;
-         });
-         
-         // Títulos de cards
-         const cardTitles = document.querySelectorAll('.card h2, .modal-header h3');
-         cardTitles.forEach(title => {
-             title.style.color = palette.primary;
-         });
-         
-         // Valores positivos
-         const positiveValues = document.querySelectorAll('.stat-value.positive');
-         positiveValues.forEach(value => {
-             value.style.color = palette.primary;
-         });
-         
-         // Links de navegación
-         const navLinks = document.querySelectorAll('.nav-links a');
-         navLinks.forEach(link => {
-             link.style.color = palette.complementary;
-         });
-         
-         // Link activo
-         const activeNavLink = document.querySelector('.nav-links a.active');
-         if (activeNavLink) {
-             activeNavLink.style.color = palette.primary;
-         }
-         
-         // Inputs y selects
-         const inputs = document.querySelectorAll('.form-group input, .form-group select, .input-group input');
-         inputs.forEach(input => {
-             input.style.borderColor = `rgba(${hexToRgb(palette.primary).r}, ${hexToRgb(palette.primary).g}, ${hexToRgb(palette.primary).b}, 0.3)`;
-             input.style.color = palette.complementary;
-         });
-         
-         // Barra de progreso
-         const progressFills = document.querySelectorAll('.progress-fill');
-         progressFills.forEach(fill => {
-             fill.style.background = `linear-gradient(90deg, ${palette.primary}, ${palette.analogous1})`;
-         });
-         
-         // Bordes de deudas activas
-         const activeDebts = document.querySelectorAll('.debt-list li:not(.paid)');
-         activeDebts.forEach(debt => {
-             debt.style.borderLeftColor = palette.primary;
-         });
-         
-         // Crear estilos dinámicos
-         const style = document.createElement('style');
-         style.textContent = `
-             .nav-links a:hover {
-                 color: ${palette.primary} !important;
-             }
-             .form-group input:focus, 
-             .form-group select:focus,
-             .input-group input:focus {
-                 border-color: ${palette.primary} !important;
-                 box-shadow: 0 0 0 2px rgba(${hexToRgb(palette.primary).r}, ${hexToRgb(palette.primary).g}, ${hexToRgb(palette.primary).b}, 0.2) !important;
-             }
-             .input-group input:focus + .input-border {
-                 background: linear-gradient(90deg, transparent, ${palette.primary}, ${palette.primary}, transparent) !important;
-             }
-             .card:hover,
-             .stat-card:hover {
-                 border-color: ${palette.primary} !important;
-             }
-             .reminder-alert {
-                 border-color: ${palette.primary} !important;
-                 background: linear-gradient(135deg, rgba(${hexToRgb(palette.primary).r}, ${hexToRgb(palette.primary).g}, ${hexToRgb(palette.primary).b}, 0.2), rgba(${hexToRgb(palette.primary).r}, ${hexToRgb(palette.primary).g}, ${hexToRgb(palette.primary).b}, 0.05)) !important;
-             }
-             ::-webkit-scrollbar-thumb {
-                 background: ${palette.primary} !important;
-             }
-             ::-webkit-scrollbar-thumb:hover {
-                 background: ${palette.darker} !important;
-             }
-         `;
-         
-         // Remover estilo anterior
-         const oldStyle = document.getElementById('dynamic-theme-style');
-         if (oldStyle) oldStyle.remove();
-         
-         style.id = 'dynamic-theme-style';
-         document.head.appendChild(style);
-         
-         // Mostrar notificación
-         showColorToast(`Theme applied! 🎨`, palette.primary);
-     }
-
+	    // Verificar si es el tema oscuro especial
+	    let palette;
+	    let isDarkTheme = (baseColor === '#dark' || baseColor === 'dark');
+	    
+	    if (isDarkTheme) {
+	        // Paleta original de dark mode (negro, grises, blanco)
+	        palette = {
+	            primary: '#ffffff',
+	            complementary: '#9ca3af',
+	            analogous1: '#4a4a4a',
+	            darker: '#1a1a1a',
+	            lighter: '#e5e5e5',
+	            softBg: '#0a0a0a',
+	            softBg2: '#1a1a1a'
+	        };
+	    } else {
+	        palette = generateColorPalette(baseColor);
+	    }
+	    
+	    // Guardar en localStorage
+	    if (isDarkTheme) {
+	        localStorage.setItem('customTheme', 'dark');
+	    } else {
+	        localStorage.setItem('customTheme', baseColor);
+	    }
+	    
+	    // Actualizar el círculo del botón
+	    const colorCircle = document.getElementById('currentColorCircle');
+	    const selectedColorSpan = document.getElementById('selectedColorCode');
+	    if (colorCircle) colorCircle.style.background = isDarkTheme ? '#1a1a1a' : baseColor;
+	    if (selectedColorSpan) selectedColorSpan.textContent = isDarkTheme ? 'Dark Mode' : baseColor;
+	    
+	    // Actualizar el color wheel (solo si no es dark mode)
+	    const colorWheel = document.getElementById('colorWheel');
+	    if (colorWheel && !isDarkTheme) colorWheel.value = baseColor;
+	    
+	    // Aplicar fondo de la página
+	    const dashboardBody = document.querySelector('.dashboard-body');
+	    if (dashboardBody) {
+	        if (isDarkTheme) {
+	            dashboardBody.style.background = `radial-gradient(ellipse at 20% 30%, #0a0a0a, #1a1a1a)`;
+	        } else {
+	            dashboardBody.style.background = `radial-gradient(ellipse at 20% 30%, ${palette.softBg}, ${palette.softBg2})`;
+	        }
+	    }
+	    
+	    // Contenedores
+	    const containers = document.querySelectorAll('.dashboard-nav, .card, .stat-card, .modal-content');
+	    containers.forEach(container => {
+	        if (isDarkTheme) {
+	            container.style.background = `rgba(20, 20, 20, 0.6)`;
+	            container.style.borderColor = `rgba(255, 255, 255, 0.05)`;
+	        } else {
+	            container.style.background = `rgba(${hexToRgb(palette.softBg).r}, ${hexToRgb(palette.softBg).g}, ${hexToRgb(palette.softBg).b}, 0.85)`;
+	            container.style.borderColor = `rgba(${hexToRgb(palette.primary).r}, ${hexToRgb(palette.primary).g}, ${hexToRgb(palette.primary).b}, 0.3)`;
+	        }
+	    });
+	    
+	    // Botones primarios
+	    const primaryBtns = document.querySelectorAll('.btn-primary');
+	    primaryBtns.forEach(btn => {
+	        if (isDarkTheme) {
+	            btn.style.background = `linear-gradient(135deg, #ffffff, #888888)`;
+	            btn.style.color = '#000000';
+	        } else {
+	            btn.style.background = `linear-gradient(135deg, ${palette.primary}, ${palette.darker})`;
+	            btn.style.color = '#ffffff';
+	        }
+	    });
+	    
+	    // Botones de pago
+	    const payBtns = document.querySelectorAll('.btn-pay');
+	    payBtns.forEach(btn => {
+	        if (isDarkTheme) {
+	            btn.style.background = `linear-gradient(135deg, #10b981, #059669)`;
+	        } else {
+	            btn.style.background = `linear-gradient(135deg, ${palette.primary}, ${palette.darker})`;
+	        }
+	    });
+	    
+	    // Botones secundarios
+	    const secondaryBtns = document.querySelectorAll('.btn-secondary, .btn-secondary-small');
+	    secondaryBtns.forEach(btn => {
+	        if (isDarkTheme) {
+	            btn.style.borderColor = `rgba(255, 255, 255, 0.3)`;
+	            btn.style.color = `#ffffff`;
+	        } else {
+	            btn.style.borderColor = `rgba(${hexToRgb(palette.primary).r}, ${hexToRgb(palette.primary).g}, ${hexToRgb(palette.primary).b}, 0.5)`;
+	            btn.style.color = palette.primary;
+	        }
+	    });
+	    
+	    // Labels de formularios
+	    const allLabels = document.querySelectorAll('.form-group label, .input-group label');
+	    allLabels.forEach(label => {
+	        label.style.color = isDarkTheme ? '#9ca3af' : palette.complementary;
+	    });
+	    
+	    // Títulos de cards
+	    const cardTitles = document.querySelectorAll('.card h2, .modal-header h3');
+	    cardTitles.forEach(title => {
+	        title.style.color = isDarkTheme ? '#ffffff' : palette.primary;
+	    });
+	    
+	    // Valores positivos
+	    const positiveValues = document.querySelectorAll('.stat-value.positive');
+	    positiveValues.forEach(value => {
+	        value.style.color = isDarkTheme ? '#10b981' : palette.primary;
+	    });
+	    
+	    // Links de navegación
+	    const navLinks = document.querySelectorAll('.nav-links a');
+	    navLinks.forEach(link => {
+	        link.style.color = isDarkTheme ? '#9ca3af' : palette.complementary;
+	    });
+	    
+	    // Link activo
+	    const activeNavLink = document.querySelector('.nav-links a.active');
+	    if (activeNavLink) {
+	        activeNavLink.style.color = isDarkTheme ? '#ffffff' : palette.primary;
+	    }
+	    
+	    // Inputs y selects
+	    const inputs = document.querySelectorAll('.form-group input, .form-group select, .input-group input');
+	    inputs.forEach(input => {
+	        if (isDarkTheme) {
+	            input.style.borderColor = `rgba(255, 255, 255, 0.2)`;
+	            input.style.color = `#ffffff`;
+	        } else {
+	            input.style.borderColor = `rgba(${hexToRgb(palette.primary).r}, ${hexToRgb(palette.primary).g}, ${hexToRgb(palette.primary).b}, 0.3)`;
+	            input.style.color = palette.complementary;
+	        }
+	    });
+	    
+	    // Barra de progreso
+	    const progressFills = document.querySelectorAll('.progress-fill');
+	    progressFills.forEach(fill => {
+	        if (isDarkTheme) {
+	            fill.style.background = `linear-gradient(90deg, #10b981, #34d399)`;
+	        } else {
+	            fill.style.background = `linear-gradient(90deg, ${palette.primary}, ${palette.analogous1})`;
+	        }
+	    });
+	    
+	    // Bordes de deudas activas
+	    const activeDebts = document.querySelectorAll('.debt-list li:not(.paid)');
+	    activeDebts.forEach(debt => {
+	        debt.style.borderLeftColor = isDarkTheme ? '#f59e0b' : palette.primary;
+	    });
+	    
+	    // Crear estilos dinámicos
+	    const style = document.createElement('style');
+	    if (isDarkTheme) {
+	        style.textContent = `
+	            .nav-links a:hover {
+	                color: #ffffff !important;
+	            }
+	            .form-group input:focus, 
+	            .form-group select:focus,
+	            .input-group input:focus {
+	                border-color: #10b981 !important;
+	                box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2) !important;
+	            }
+	            .input-group input:focus + .input-border {
+	                background: linear-gradient(90deg, transparent, #ffffff, #ffffff, transparent) !important;
+	            }
+	            .card:hover,
+	            .stat-card:hover {
+	                border-color: #10b981 !important;
+	            }
+	            .reminder-alert {
+	                border-color: #f59e0b !important;
+	                background: linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(245, 158, 11, 0.05)) !important;
+	            }
+	            ::-webkit-scrollbar-thumb {
+	                background: #4a4a4a !important;
+	            }
+	            ::-webkit-scrollbar-thumb:hover {
+	                background: #6b7280 !important;
+	            }
+	        `;
+	    } else {
+	        style.textContent = `
+	            .nav-links a:hover {
+	                color: ${palette.primary} !important;
+	            }
+	            .form-group input:focus, 
+	            .form-group select:focus,
+	            .input-group input:focus {
+	                border-color: ${palette.primary} !important;
+	                box-shadow: 0 0 0 2px rgba(${hexToRgb(palette.primary).r}, ${hexToRgb(palette.primary).g}, ${hexToRgb(palette.primary).b}, 0.2) !important;
+	            }
+	            .input-group input:focus + .input-border {
+	                background: linear-gradient(90deg, transparent, ${palette.primary}, ${palette.primary}, transparent) !important;
+	            }
+	            .card:hover,
+	            .stat-card:hover {
+	                border-color: ${palette.primary} !important;
+	            }
+	            .reminder-alert {
+	                border-color: ${palette.primary} !important;
+	                background: linear-gradient(135deg, rgba(${hexToRgb(palette.primary).r}, ${hexToRgb(palette.primary).g}, ${hexToRgb(palette.primary).b}, 0.2), rgba(${hexToRgb(palette.primary).r}, ${hexToRgb(palette.primary).g}, ${hexToRgb(palette.primary).b}, 0.05)) !important;
+	            }
+	            ::-webkit-scrollbar-thumb {
+	                background: ${palette.primary} !important;
+	            }
+	            ::-webkit-scrollbar-thumb:hover {
+	                background: ${palette.darker} !important;
+	            }
+	        `;
+	    }
+	    
+	    // Remover estilo anterior
+	    const oldStyle = document.getElementById('dynamic-theme-style');
+	    if (oldStyle) oldStyle.remove();
+	    
+	    style.id = 'dynamic-theme-style';
+	    document.head.appendChild(style);
+	    
+	    // Mostrar notificación
+	    showColorToast(isDarkTheme ? `Dark Mode restored! 🌙` : `Theme applied! 🎨`, isDarkTheme ? '#10b981' : palette.primary);
+	}
+     
      // Inicializar
      document.addEventListener('DOMContentLoaded', () => {
          loadSavedColorTheme();
