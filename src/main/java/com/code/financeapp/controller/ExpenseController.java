@@ -1,14 +1,14 @@
-package com.agustin.financeapp.controller;
+package com.code.financeapp.controller;
 
 import java.util.List;
 import java.util.Optional;
 
 import org.springframework.web.bind.annotation.*;
 
-import com.agustin.financeapp.model.Expense;
-import com.agustin.financeapp.model.User;
-import com.agustin.financeapp.service.ExpenseService;
-import com.agustin.financeapp.service.UserService;
+import com.code.financeapp.model.Expense;
+import com.code.financeapp.model.User;
+import com.code.financeapp.service.ExpenseService;
+import com.code.financeapp.service.UserService;
 
 @RestController
 @RequestMapping("/expenses")

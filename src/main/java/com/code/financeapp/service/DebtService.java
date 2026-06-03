@@ -1,4 +1,4 @@
-package com.agustin.financeapp.service;
+package com.code.financeapp.service;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -8,10 +8,10 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.agustin.financeapp.model.Debt;
-import com.agustin.financeapp.model.Payment;
-import com.agustin.financeapp.repository.DebtRepository;
-import com.agustin.financeapp.repository.PaymentRepository;
+import com.code.financeapp.model.Debt;
+import com.code.financeapp.model.Payment;
+import com.code.financeapp.repository.DebtRepository;
+import com.code.financeapp.repository.PaymentRepository;
 
 @Service
 @Transactional

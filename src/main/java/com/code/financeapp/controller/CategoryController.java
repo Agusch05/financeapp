@@ -1,11 +1,11 @@
-package com.agustin.financeapp.controller;
+package com.code.financeapp.controller;
 
 import java.util.List;
 
 import org.springframework.web.bind.annotation.*;
 
-import com.agustin.financeapp.model.Category;
-import com.agustin.financeapp.service.CategoryService;
+import com.code.financeapp.model.Category;
+import com.code.financeapp.service.CategoryService;
 
 @RestController
 @RequestMapping("/category")

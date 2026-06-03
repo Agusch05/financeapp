@@ -66,86 +66,82 @@
     <script>
         const API_BASE = 'http://localhost:8080';
 
-        // ============================================
-        // LOGIN FUNCTIONALITY
-        // ============================================
-        function showColorToast(message, color) {
-		    let toast = document.getElementById('color-toast');
-		    if (!toast) {
-		        toast = document.createElement('div');
-		        toast.id = 'color-toast';
-		        toast.style.position = 'fixed';
-		        toast.style.bottom = '20px';
-		        toast.style.left = '50%';
-		        toast.style.transform = 'translateX(-50%)';
-		        toast.style.background = color;
-		        toast.style.color = '#fff';
-		        toast.style.padding = '12px 24px';
-		        toast.style.borderRadius = '40px';
-		        toast.style.fontSize = '14px';
-		        toast.style.fontWeight = '500';
-		        toast.style.zIndex = '10000';
-		        toast.style.boxShadow = '0 4px 12px rgba(0,0,0,0.2)';
-		        toast.style.opacity = '0';
-		        toast.style.transition = 'opacity 0.3s ease';
-		        document.body.appendChild(toast);
-		    }
-		    
-		    toast.textContent = message;
-		    toast.style.background = color;
-		    toast.style.opacity = '1';
-		    
-		    setTimeout(() => {
-		        toast.style.opacity = '0';
-		    }, 2000);
-		}
-        
-        document.getElementById('loginForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const nickname = document.getElementById('nickname').value.trim();
-            const password = document.getElementById('password').value;
-            
-            if (!nickname || !password) {
-                showColorToast('Please enter both nickname and password', '#f59e0b');
-                return;
-            }
-            
-            // Mostrar loading en el botón
-            const submitBtn = e.target.querySelector('button[type="submit"]');
-            const originalText = submitBtn.innerHTML;
-            submitBtn.innerHTML = '<span class="loading-spinner"></span> Loading...';
-            submitBtn.disabled = true;
-            
-            try {
-                const response = await fetch(`${API_BASE}/users`);
-                const users = await response.json();
-                
-                const user = users.find(u => u.name === nickname && u.password === password);
-                
-                if (user) {
-                    localStorage.setItem('user', JSON.stringify(user));
-                    showColorToast(`Welcome back, ${user.name}! 🎉`, '#10b981');
-                    setTimeout(() => {
-                        window.location.href = 'dashboard.html';
-                    }, 1000);
-                } else {
-                    const userExists = users.some(u => u.name === nickname);
-                    if (userExists) {
-                        showColorToast('Incorrect password. Please try again.', '#ef4444');
-                    } else {
-                        showColorToast('User not found. Please register first.', '#f59e0b');
-                    }
-                    submitBtn.innerHTML = originalText;
-                    submitBtn.disabled = false;
-                }
-            } catch (error) {
-                console.error('Login error:', error);
-                showColorToast('Connection error. Make sure the server is running.', '#ef4444');
-                submitBtn.innerHTML = originalText;
-                submitBtn.disabled = false;
-            }
-        });
+     // ============================================
+     // LOGIN FUNCTIONALITY
+     // ============================================
+     function showColorToast(message, color) {
+         let toast = document.getElementById('color-toast');
+         if (!toast) {
+             toast = document.createElement('div');
+             toast.id = 'color-toast';
+             toast.style.position = 'fixed';
+             toast.style.bottom = '20px';
+             toast.style.left = '50%';
+             toast.style.transform = 'translateX(-50%)';
+             toast.style.background = color;
+             toast.style.color = '#fff';
+             toast.style.padding = '12px 24px';
+             toast.style.borderRadius = '40px';
+             toast.style.fontSize = '14px';
+             toast.style.fontWeight = '500';
+             toast.style.zIndex = '10000';
+             toast.style.boxShadow = '0 4px 12px rgba(0,0,0,0.2)';
+             toast.style.opacity = '0';
+             toast.style.transition = 'opacity 0.3s ease';
+             document.body.appendChild(toast);
+         }
+         toast.textContent = message;
+         toast.style.background = color;
+         toast.style.opacity = '1';
+         setTimeout(() => {
+             toast.style.opacity = '0';
+         }, 2000);
+     }
+
+     document.getElementById('loginForm').addEventListener('submit', async (e) => {
+         e.preventDefault();
+         
+         const nickname = document.getElementById('nickname').value.trim();
+         const password = document.getElementById('password').value;
+         
+         if (!nickname || !password) {
+             showColorToast('Please enter both nickname and password', '#f59e0b');
+             return;
+         }
+         
+         const submitBtn = e.target.querySelector('button[type="submit"]');
+         const originalText = submitBtn.innerHTML;
+         submitBtn.innerHTML = '<span class="loading-spinner"></span> Loading...';
+         submitBtn.disabled = true;
+         
+         try {
+             // 👇 NUEVA LLAMADA AL ENDPOINT /login
+             const response = await fetch(`${API_BASE}/users/login`, {
+                 method: 'POST',
+                 headers: { 'Content-Type': 'application/json' },
+                 body: JSON.stringify({ name: nickname, password: password })
+             });
+             
+             if (response.ok) {
+                 const user = await response.json();
+                 localStorage.setItem('user', JSON.stringify(user));
+                 showColorToast(`Welcome back, ${user.name}! 🎉`, '#10b981');
+                 setTimeout(() => {
+                     window.location.href = 'dashboard.html';
+                 }, 1000);
+             } else {
+                 const errorMsg = await response.text();
+                 showColorToast(errorMsg, '#ef4444');
+                 submitBtn.innerHTML = originalText;
+                 submitBtn.disabled = false;
+             }
+         } catch (error) {
+             console.error('Login error:', error);
+             showColorToast('Connection error. Make sure the server is running.', '#ef4444');
+             submitBtn.innerHTML = originalText;
+             submitBtn.disabled = false;
+         }
+     });
     </script>
 </body>
 </html>

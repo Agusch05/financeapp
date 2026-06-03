@@ -1,11 +1,11 @@
-package com.agustin.financeapp.service;
+package com.code.financeapp.service;
 
 import java.util.List;
 
 import org.springframework.stereotype.Service;
 
-import com.agustin.financeapp.model.Category;
-import com.agustin.financeapp.repository.CategoryRepository;
+import com.code.financeapp.model.Category;
+import com.code.financeapp.repository.CategoryRepository;
 
 @Service
 public class CategoryService {

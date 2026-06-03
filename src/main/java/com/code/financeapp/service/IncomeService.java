@@ -1,4 +1,4 @@
-package com.agustin.financeapp.service;
+package com.code.financeapp.service;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -6,8 +6,8 @@ import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
-import com.agustin.financeapp.model.Income;
-import com.agustin.financeapp.repository.IncomeRepository;
+import com.code.financeapp.model.Income;
+import com.code.financeapp.repository.IncomeRepository;
 
 @Service
 public class IncomeService {

@@ -1,4 +1,4 @@
-package com.agustin.financeapp.model;
+package com.code.financeapp.model;
 
 import java.time.LocalDate;
 import jakarta.persistence.*;

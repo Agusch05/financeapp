@@ -1,11 +1,11 @@
-package com.agustin.financeapp.controller;
+package com.code.financeapp.controller;
 
 import java.util.List;
 
 import org.springframework.web.bind.annotation.*;
 
-import com.agustin.financeapp.model.Income;
-import com.agustin.financeapp.service.IncomeService;
+import com.code.financeapp.model.Income;
+import com.code.financeapp.service.IncomeService;
 
 @RestController
 @RequestMapping("/incomes")

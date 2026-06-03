@@ -1,4 +1,4 @@
-package com.agustin.financeapp.controller;
+package com.code.financeapp.controller;
 
 import java.util.ArrayList;
 import java.util.List;

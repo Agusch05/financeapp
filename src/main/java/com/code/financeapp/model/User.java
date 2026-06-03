@@ -1,27 +1,30 @@
-package com.agustin.financeapp.model;
+package com.code.financeapp.model;
 
 import jakarta.persistence.*;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.List;
 
 @Entity
-@Table(name = "categories")
-public class Category {
+@Table(name = "users")
+public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private String name;
+    private String nickname;
+	private String password;
     
-    @OneToMany(mappedBy = "category")
+    @OneToMany(mappedBy = "user")
     @JsonIgnore  // ✅ Ignorar la lista de expenses para evitar recursión
     private List<Expense> expenses;
 
-    public Category() {}
+    public User() {}
 
-    public Category(String name) {
+    public User(String name, String password) {
         this.name = name;
+        this.password = password;
     }
 
     public Long getId() { return id; }
@@ -30,6 +33,17 @@ public class Category {
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
     
+    public String getPassword() { return password; }
+    public void setPassword(String password) { this.password = password; }
+    
     public List<Expense> getExpenses() { return expenses; }
     public void setExpenses(List<Expense> expenses) { this.expenses = expenses; }
+    
+    public String getNickname() {
+		return nickname;
+	}
+
+	public void setNickname(String nickname) {
+		this.nickname = nickname;
+	}
 }

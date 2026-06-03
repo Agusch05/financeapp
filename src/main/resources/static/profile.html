@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="css/profile.css">
     <link rel="stylesheet" href="css/components.css">
     <link rel="stylesheet" href="css/themes.css">
+    <link rel="stylesheet" href="css/dashboard.css">
     <!-- FullCalendar para el calendario -->
     <link href='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css' rel='stylesheet' />
     <script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js'></script>
@@ -82,23 +83,6 @@
                 </div>
                 <button class="btn-secondary" onclick="showChangePasswordModal()" style="margin-top: 20px;">🔒 Change Password</button>
             </div>
-
-            <!-- Configuración de Salario Mensual -->
-            <div class="card">
-                <h2>💰 Monthly Salary 
-                    <span class="info-tip" data-tooltip="Set your monthly salary. It will be automatically added as income on the 1st of each month. You can edit or delete these automatic entries anytime.">
-                        ⓘ
-                    </span>
-                </h2>
-                <div class="form-group">
-                    <label>Monthly Salary ($)</label>
-                    <input type="number" id="monthlySalary" placeholder="0.00" step="0.01">
-                </div>
-                <div class="salary-status" id="salaryStatus"></div>
-                <button class="btn-primary" onclick="saveMonthlySalary()">Save Salary Setting</button>
-                <button class="btn-secondary" onclick="deleteFutureSalaryIncomes()" style="margin-top: 10px;">🗑️ Delete Future Salary Incomes</button>
-            </div>
-
             <!-- Calendario -->
             <div class="card calendar-card">
                 <h2>📅 Financial Calendar</h2>
@@ -387,16 +371,14 @@
                 return;
             }
             
-            if (currentPassword !== currentUser.password) {
-                showColorToast('Current password is incorrect', '#ef4444');
-                return;
-            }
-            
             try {
-                const response = await fetch(`${API_BASE}/users/${currentUser.id}`, {
+                const response = await fetch(`${API_BASE}/users/${currentUser.id}/password`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ ...currentUser, password: newPassword })
+                    body: JSON.stringify({
+                        currentPassword: currentPassword,
+                        newPassword: newPassword
+                    })
                 });
                 
                 if (response.ok) {
@@ -406,94 +388,12 @@
                     showColorToast('Password changed successfully!', '#10b981');
                     closeChangePasswordModal();
                 } else {
-                    showColorToast('Error changing password', '#ef4444');
+                    const errorText = await response.text();
+                    showColorToast(errorText || 'Error changing password', '#ef4444');
                 }
             } catch (error) {
                 console.error('Error:', error);
-                showColorToast('Error connecting to server', '#ef4444');
-            }
-        }
-
-        // Salario mensual
-        async function loadMonthlySalary() {
-            const salary = localStorage.getItem(`salary_${currentUser.id}`);
-            if (salary) {
-                document.getElementById('monthlySalary').value = salary;
-                document.getElementById('salaryStatus').innerHTML = `<span style="color: #10b981;">✅ Salary set to $${salary}. Auto-income will be added on the 1st of each month.</span>`;
-            }
-        }
-
-        async function saveMonthlySalary() {
-            const salary = parseFloat(document.getElementById('monthlySalary').value);
-            if (isNaN(salary) || salary <= 0) {
-                showColorToast('Please enter a valid salary amount', '#f59e0b');
-                return;
-            }
-            
-            localStorage.setItem(`salary_${currentUser.id}`, salary);
-            document.getElementById('salaryStatus').innerHTML = `<span style="color: #10b981;">✅ Salary set to $${salary}. Auto-income will be added on the 1st of each month.</span>`;
-            showColorToast('Salary saved successfully!', '#10b981');
-            
-            // Generar incomes futuros
-            await generateFutureSalaryIncomes(salary);
-        }
-
-        async function generateFutureSalaryIncomes(salary) {
-            const today = new Date();
-            const currentYear = today.getFullYear();
-            const currentMonth = today.getMonth();
-            
-            // Generar para los próximos 12 meses
-            for (let i = 0; i < 12; i++) {
-                let targetMonth = currentMonth + i;
-                let targetYear = currentYear;
-                if (targetMonth > 11) {
-                    targetMonth -= 12;
-                    targetYear++;
-                }
-                const incomeDate = new Date(targetYear, targetMonth, 1);
-                
-                // Solo generar si la fecha es futura
-                if (incomeDate > today) {
-                    const income = {
-                        amount: salary,
-                        date: incomeDate.toISOString().split('T')[0],
-                        source: '💰 Monthly Salary (Auto)'
-                    };
-                    
-                    try {
-                        await fetch(`${API_BASE}/incomes`, {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify(income)
-                        });
-                    } catch (error) {
-                        console.error('Error generating salary income:', error);
-                    }
-                }
-            }
-            showColorToast('Future salary incomes generated!', '#10b981');
-        }
-
-        async function deleteFutureSalaryIncomes() {
-            try {
-                const response = await fetch(`${API_BASE}/incomes`);
-                const incomes = await response.json();
-                const today = new Date();
-                today.setHours(0, 0, 0, 0);
-                
-                for (const income of incomes) {
-                    if (income.source === '💰 Monthly Salary (Auto)') {
-                        const incomeDate = new Date(income.date);
-                        if (incomeDate > today) {
-                            await fetch(`${API_BASE}/incomes/${income.id}`, { method: 'DELETE' });
-                        }
-                    }
-                }
-                showColorToast('Future salary incomes deleted!', '#10b981');
-            } catch (error) {
-                console.error('Error:', error);
-                showColorToast('Error deleting future salary incomes', '#ef4444');
+                showColorToast('Connection error', '#ef4444');
             }
         }
 

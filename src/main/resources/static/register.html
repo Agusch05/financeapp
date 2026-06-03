@@ -70,110 +70,110 @@
     </div>
 
     <script>
-        const API_BASE = 'http://localhost:8080';
+    const API_BASE = 'http://localhost:8080';
+    
+    // Toast temporal para mostrar notificaciones
+    function showColorToast(message, color) {
+        let toast = document.getElementById('color-toast');
+        if (!toast) {
+            toast = document.createElement('div');
+            toast.id = 'color-toast';
+            toast.style.position = 'fixed';
+            toast.style.bottom = '20px';
+            toast.style.left = '50%';
+            toast.style.transform = 'translateX(-50%)';
+            toast.style.background = color;
+            toast.style.color = '#fff';
+            toast.style.padding = '12px 24px';
+            toast.style.borderRadius = '40px';
+            toast.style.fontSize = '14px';
+            toast.style.fontWeight = '500';
+            toast.style.zIndex = '10000';
+            toast.style.boxShadow = '0 4px 12px rgba(0,0,0,0.2)';
+            toast.style.opacity = '0';
+            toast.style.transition = 'opacity 0.3s ease';
+            document.body.appendChild(toast);
+        }
+        toast.textContent = message;
+        toast.style.background = color;
+        toast.style.opacity = '1';
+        setTimeout(() => {
+            toast.style.opacity = '0';
+        }, 2000);
+    }
+
+    document.getElementById('registerForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
         
+        const name = document.getElementById('name').value.trim();
+        const nickname = document.getElementById('nickname').value.trim();
+        const password = document.getElementById('password').value;
+        const confirmPassword = document.getElementById('confirmPassword').value;
         
-        // ============================================
-        // REGISTER FUNCTIONALITY
-        // ============================================
-        // Toast temporal para mostrar notificaciones
-		function showColorToast(message, color) {
-		    let toast = document.getElementById('color-toast');
-		    if (!toast) {
-		        toast = document.createElement('div');
-		        toast.id = 'color-toast';
-		        toast.style.position = 'fixed';
-		        toast.style.bottom = '20px';
-		        toast.style.left = '50%';
-		        toast.style.transform = 'translateX(-50%)';
-		        toast.style.background = color;
-		        toast.style.color = '#fff';
-		        toast.style.padding = '12px 24px';
-		        toast.style.borderRadius = '40px';
-		        toast.style.fontSize = '14px';
-		        toast.style.fontWeight = '500';
-		        toast.style.zIndex = '10000';
-		        toast.style.boxShadow = '0 4px 12px rgba(0,0,0,0.2)';
-		        toast.style.opacity = '0';
-		        toast.style.transition = 'opacity 0.3s ease';
-		        document.body.appendChild(toast);
-		    }
-		    
-		    toast.textContent = message;
-		    toast.style.background = color;
-		    toast.style.opacity = '1';
-		    
-		    setTimeout(() => {
-		        toast.style.opacity = '0';
-		    }, 2000);
-		}
-        document.getElementById('registerForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
+        if (!name || !nickname || !password) {
+            showColorToast('Please fill in all fields', '#f59e0b');
+            return;
+        }
+        
+        if (name.length < 3) {
+            showColorToast('Name must be at least 3 characters', '#f59e0b');
+            return;
+        }
+        
+        if (nickname.length < 3) {
+            showColorToast('Nickname must be at least 3 characters', '#f59e0b');
+            return;
+        }
+        
+        if (password.length < 5) {
+            showColorToast('Password must be at least 5 characters', '#f59e0b');
+            return;
+        }
+        
+        if (password !== confirmPassword) {
+            showColorToast('Passwords do not match', '#ef4444');
+            return;
+        }
+        
+        const submitBtn = e.target.querySelector('button[type="submit"]');
+        const originalText = submitBtn.innerHTML;
+        submitBtn.innerHTML = '<span class="loading-spinner"></span> Creating...';
+        submitBtn.disabled = true;
+        
+        // ✅ AHORA ENVÍA name, nickname Y password
+        const user = { 
+            name: name, 
+            nickname: nickname, 
+            password: password 
+        };
+        
+        try {
+            const response = await fetch(`${API_BASE}/users`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(user)
+            });
             
-            const name = document.getElementById('name').value.trim();
-            const nickname = document.getElementById('nickname').value.trim();
-            const password = document.getElementById('password').value;
-            const confirmPassword = document.getElementById('confirmPassword').value;
-            
-            if (!name || !nickname || !password) {
-                showColorToast('Please fill in all fields', '#f59e0b');
-                return;
-            }
-            
-            if (name.length < 3) {
-                showColorToast('Name must be at least 3 characters', '#f59e0b');
-                return;
-            }
-            
-            if (nickname.length < 3) {
-                showColorToast('Nickname must be at least 3 characters', '#f59e0b');
-                return;
-            }
-            
-            if (password.length < 5) {
-                showColorToast('Password must be at least 5 characters', '#f59e0b');
-                return;
-            }
-            
-            if (password !== confirmPassword) {
-                showColorToast('Passwords do not match', '#ef4444');
-                return;
-            }
-            
-            const submitBtn = e.target.querySelector('button[type="submit"]');
-            const originalText = submitBtn.innerHTML;
-            submitBtn.innerHTML = '<span class="loading-spinner"></span> Creating...';
-            submitBtn.disabled = true;
-            
-            const user = { name: name, password: password };
-            
-            try {
-                const response = await fetch(`${API_BASE}/users`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(user)
-                });
-                
-                if (response.ok) {
-                    const newUser = await response.json();
-                    localStorage.setItem('user', JSON.stringify(newUser));
-                    showColorToast('Account created successfully! 🎉', '#10b981');
-                    setTimeout(() => {
-                        window.location.href = 'dashboard.html';
-                    }, 1000);
-                } else {
-                    const errorText = await response.text();
-                    showColorToast('Error creating account: ' + errorText, '#ef4444');
-                    submitBtn.innerHTML = originalText;
-                    submitBtn.disabled = false;
-                }
-            } catch (error) {
-                console.error('Registration error:', error);
-                showColorToast('Connection error. Make sure the server is running.', '#ef4444');
+            if (response.ok) {
+                const newUser = await response.json();
+                localStorage.setItem('user', JSON.stringify(newUser));
+                showColorToast('Account created successfully! 🎉', '#10b981');
+                setTimeout(() => {
+                    window.location.href = 'dashboard.html';
+                }, 1000);
+            } else {
+                const errorText = await response.text();
+                showColorToast('Error creating account: ' + errorText, '#ef4444');
                 submitBtn.innerHTML = originalText;
                 submitBtn.disabled = false;
             }
-        });
-    </script>
+        } catch (error) {
+            console.error('Registration error:', error);
+            showColorToast('Connection error. Make sure the server is running.', '#ef4444');
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
+        }
+    });
+</script>
 </body>
 </html>
