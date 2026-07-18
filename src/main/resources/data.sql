@@ -7,6 +7,7 @@ DROP TABLE IF EXISTS users;
 CREATE TABLE IF NOT EXISTS users (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
+    nickname VARCHAR(255) UNIQUE,   -- Agregamos nickname
     password VARCHAR(255) NOT NULL
 );
 
@@ -28,9 +29,9 @@ CREATE TABLE IF NOT EXISTS expense (
     FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
--- Insertar usuario por defecto
-INSERT INTO users (name, password) VALUES ('Admin', 'admin');
-INSERT INTO users (name, password) VALUES ('Demo', 'demo');
+-- Insertar usuario por defecto (incluyendo nickname)
+INSERT INTO users (name, nickname, password) VALUES ('Admin', 'admin', 'admin');
+INSERT INTO users (name, nickname, password) VALUES ('Demo', 'demo', 'demo');
 
 -- Insertar categorías por defecto
 INSERT INTO category (name) VALUES ('Food');

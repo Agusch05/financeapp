@@ -19,7 +19,7 @@
 <body class="dashboard-body">
     <div class="dashboard-container">
         <!-- Navigation -->
-        <nav class="dashboard-nav">
+        <nav class="dashboard-nav" id="mainNav">
             <div class="nav-logo">
                 <h2>FINANCE<span style="font-weight:300">APP</span></h2>
             </div>
@@ -372,24 +372,49 @@
         
         // Tab navigation
         function setupTabs() {
-            const tabs = document.querySelectorAll('.nav-links a');
-            tabs.forEach(tab => {
-                tab.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    const tabId = tab.dataset.tab;
-                    
-                    // Update active tab
-                    tabs.forEach(t => t.classList.remove('active'));
-                    tab.classList.add('active');
-                    
-                    // Show corresponding content
-                    document.querySelectorAll('.tab-content').forEach(content => {
-                        content.classList.remove('active');
-                    });
-                    document.getElementById(`${tabId}Tab`).classList.add('active');
-                });
-            });
-        }
+		    const navLinks = document.querySelector('.nav-links');
+		    if (!navLinks) {
+		        console.error('❌ No se encontró .nav-links');
+		        return;
+		    }
+		
+		    navLinks.addEventListener('click', function(e) {
+		        const link = e.target.closest('a');
+		        if (!link) return;
+		        e.preventDefault();
+		
+		        const tabId = link.dataset.tab;
+		        if (!tabId) return;
+		
+		        const allLinks = this.querySelectorAll('a');
+		        const allContents = document.querySelectorAll('.tab-content');
+		
+		        // Quitar active de todos
+		        allLinks.forEach(a => a.classList.remove('active'));
+		        allContents.forEach(c => c.classList.remove('active'));
+		
+		        // Activar el clicado
+		        link.classList.add('active');
+		        const target = document.getElementById(`${tabId}Tab`);
+		        if (target) target.classList.add('active');
+		
+		        // 🔥 FORZAR COLORES INLINE SEGÚN EL TEMA GUARDADO
+		        const savedTheme = localStorage.getItem('customTheme');
+		        const isDark = (savedTheme === 'dark' || savedTheme === '#dark');
+		        // Color para enlaces inactivos (depende del tema)
+		        const inactiveColor = isDark ? '#9ca3af' : '#9ca3af';
+		        // Color para enlace activo (usa el color primario del tema)
+		        let activeColor = isDark ? '#ffffff' : '#10b981'; // fallback
+		        if (!isDark && savedTheme && savedTheme.startsWith('#')) {
+		            activeColor = savedTheme; // usa el color elegido por el usuario
+		        }
+		
+		        allLinks.forEach(a => {
+		            a.style.color = inactiveColor;
+		        });
+		        link.style.color = activeColor;
+		    });
+		}
         
         // Categories
         async function loadCategories() {
@@ -844,7 +869,6 @@
             }
         }
         
-        // Debts - Enhanced version
 		// Función para calcular el pago mensual (fórmula de amortización)
 		function calculateMonthlyPayment() {
 		    const totalAmount = parseFloat(document.getElementById('debtAmount').value) || 0;
@@ -1114,9 +1138,7 @@
 		    }
 		}
 		
-		// ============================================
 		// FUNCIONES DE BÚSQUEDA PARA INCOMES
-		// ============================================
 
 		let allIncomes = [];
 
@@ -1175,9 +1197,7 @@
 		    displayIncomes(allIncomes);
 		}
 
-		// ============================================
 		// FUNCIONES DE BÚSQUEDA PARA DEUDAS
-		// ============================================
 
 		let allDebts = [];
 		let filteredActiveDebts = [];

@@ -39,12 +39,6 @@
             <scope>runtime</scope>
         </dependency>
 
-        <!-- Seguridad para BCrypt -->
-        <dependency>
-            <groupId>org.springframework.security</groupId>
-            <artifactId>spring-security-crypto</artifactId>
-        </dependency>
-
         <!-- Starter -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
